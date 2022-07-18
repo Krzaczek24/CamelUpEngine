@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace TestCamelUpEngine.CamelsOnField
 {
-    public class SettingCamelsOnStackTest : BaseClass
+    internal class SettingCamelsOnStackTest : BaseClass
     {
         private static IReadOnlyCollection<Camel> CamelsFirstPack { get; } = Camels.Take(3).ToList();
         private static IReadOnlyCollection<Camel> CamelsSecondPack { get; } = Camels.TakeLast(3).ToList();

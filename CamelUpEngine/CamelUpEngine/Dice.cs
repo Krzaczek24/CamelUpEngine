@@ -3,7 +3,14 @@ using System.Linq;
 
 namespace CamelUpEngine
 {
-    public sealed class Dice
+    public interface IDice : IColourable { }
+
+    public interface IDrawnDice : IDice
+    {
+        public int Value { get; }
+    }
+
+    internal sealed class Dice : IDice
     {
         public Colour Colour { get; }
 
@@ -18,7 +25,7 @@ namespace CamelUpEngine
         public override string ToString() => $"{Colour} dice";
     }
 
-    public sealed class DrawnDice
+    internal sealed class DrawnDice : IDrawnDice
     {
         public Colour Colour { get; }
         public int Value { get; }

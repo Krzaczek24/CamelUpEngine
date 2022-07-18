@@ -1,8 +1,7 @@
 ﻿namespace CamelUpEngine
 {
-    public interface ICamel
+    public interface ICamel : IColourable
     {
-        public Colour Colour { get; }
         public bool IsMad { get; }
     }
 

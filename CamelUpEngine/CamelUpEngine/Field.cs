@@ -10,7 +10,7 @@ namespace CamelUpEngine
         public int Index { get; }
 
         public IReadOnlyCollection<ICamel> GetCamels();
-        public bool HasCamel(Colour colour);
+        //public bool HasCamel(Colour colour);
     }
 
     public sealed class Field : IField
@@ -39,10 +39,11 @@ namespace CamelUpEngine
 
         public IReadOnlyCollection<ICamel> GetCamels() => Camels;
 
+        public void PutCamelsOnTop(Camel camel) => PutCamelsOnTop(new[] { camel });
         public void PutCamelsOnTop(ICollection<Camel> camels) => Camels.InsertRange(0, camels);
 
         public void PutCamelsOnBottom(ICollection<Camel> camels) => Camels.AddRange(camels);
 
-        public bool HasCamel(Colour colour) => Camels.Any(c => c.Colour == colour);
+        //public bool HasCamel(Colour colour) => Camels.Any(c => c.Colour == colour);
     }
 }

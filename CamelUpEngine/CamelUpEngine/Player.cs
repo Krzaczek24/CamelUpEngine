@@ -2,11 +2,13 @@
 {
     public interface IPlayer
     {
+        public const int INITIAL_COINS_COUNT = 3;
+
         public string Name { get; }
         public int Coins { get; }
     }
 
-    public sealed class Player: IPlayer
+    internal sealed class Player : IPlayer
     {
         public string Name { get; }
         public int Coins { get; }
@@ -15,7 +17,7 @@
         public Player(string name)
         {
             Name = name;
-            Coins = 3;
+            Coins = IPlayer.INITIAL_COINS_COUNT;
         }
     }
 }

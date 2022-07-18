@@ -6,16 +6,16 @@ namespace CamelUpEngine
 {
     public sealed class Dicer
     {
-        private List<Dice> remainingDices = new List<Dice>();
-        private List<DrawnDice> drawnDices = new List<DrawnDice>();
-        public IReadOnlyCollection<DrawnDice> DrawnDices => drawnDices.AsReadOnly();
+        private IList<Dice> remainingDices = new List<Dice>();
+        private IList<DrawnDice> drawnDices = new List<DrawnDice>();
+        public IReadOnlyCollection<IDrawnDice> DrawnDices => drawnDices.ToList();
 
         public Dicer()
         {
             Reset();
         }
 
-        public DrawnDice DrawDice()
+        public IDrawnDice DrawDice()
         {
             Dice dice = remainingDices.OrderBy(d => Guid.NewGuid()).FirstOrDefault();
             if (dice == null)
@@ -39,7 +39,7 @@ namespace CamelUpEngine
             }
         }
 
-        public static IReadOnlyCollection<DrawnDice> DrawDicesForInitialCamelsPlacement()
+        public static IReadOnlyCollection<IDrawnDice> DrawDicesForInitialCamelsPlacement()
         {
             return ColourHelper.AllCamelColours.Select(colour => new DrawnDice(new Dice(colour))).ToList();
         }

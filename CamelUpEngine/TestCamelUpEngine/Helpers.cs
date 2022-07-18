@@ -6,9 +6,9 @@ namespace TestCamelUpEngine
 {
     internal static class Helpers
     {
-        public static IEnumerable<Colour> GetColours(this IEnumerable<ICamel> camels)
+        public static IEnumerable<Colour> GetColours(this IEnumerable<IColourable> colourables)
         {
-            return camels.Select(camel => camel.Colour).ToList();
+            return colourables.Select(colourable => colourable.Colour).ToList();
         }
     }
 }

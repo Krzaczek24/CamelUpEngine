@@ -5,17 +5,8 @@ using System.Linq;
 
 namespace TestCamelUpEngine.NewGame
 {
-    public class NewGameCamelsPositionsTest
+    internal class NewGameCamelsPositionsTest : BaseClass
     {
-        private Game game;
-
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            var players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
-            game = new Game(players);
-        }
-
         [Test]
         public void TestIfGameGotAllField()
         {
@@ -28,15 +19,12 @@ namespace TestCamelUpEngine.NewGame
         [Test]
         public void TestIfAllCamelsAreOnboard()
         {
+            ICollection<ICamel> foundCamels = new List<ICamel>();
+
             var firstFields = game.Fields.Take(3);
             var lastFields = game.Fields.TakeLast(3);
-            var fieldsToCheck = firstFields.Concat(lastFields);
-
-            ICollection<ICamel> foundCamels = new List<ICamel>();
-            foreach (IField field in fieldsToCheck)
-            {
-                field.GetCamels().ToList().ForEach(foundCamels.Add);
-            }
+            var fieldsToCheck = firstFields.Concat(lastFields).ToList();
+            fieldsToCheck.ForEach(field => field.GetCamels().ToList().ForEach(foundCamels.Add));
 
             CollectionAssert.AllItemsAreUnique(game.Camels);
             CollectionAssert.AllItemsAreUnique(game.Camels.GetColours());

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace TestCamelUpEngine.CamelsOnField
 {
-    public abstract class BaseClass
+    internal abstract class BaseClass
     {
         protected static IReadOnlyCollection<Camel> Camels { get; } = new Camel[]
         {

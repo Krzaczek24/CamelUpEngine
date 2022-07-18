@@ -16,11 +16,17 @@ namespace CamelUpEngine
         Mad
     }
 
+    public interface IColourable
+    {
+        public Colour Colour { get; }
+    }
+
     public static class ColourHelper
     {
         public static IEnumerable<Colour> MadColours { get; } = new[] { Colour.White, Colour.Black };
-        public static IEnumerable<Colour> AllCamelColours { get; } = Enum.GetValues<Colour>().Except(new[] { Colour.Mad });
-        public static IEnumerable<Colour> AllDiceColours { get; } = Enum.GetValues<Colour>().Except(MadColours);
+        public static IEnumerable<Colour> AllColours { get; } = Enum.GetValues<Colour>();
+        public static IEnumerable<Colour> AllCamelColours { get; } = AllColours.Except(new[] { Colour.Mad });
+        public static IEnumerable<Colour> AllDiceColours { get; } = AllColours.Except(MadColours);
 
         public static bool IsMadColour(Colour colour) => MadColours.Contains(colour);
     }

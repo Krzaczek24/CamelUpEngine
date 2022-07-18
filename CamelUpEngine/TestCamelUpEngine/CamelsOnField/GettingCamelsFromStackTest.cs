@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace TestCamelUpEngine.CamelsOnField
 {
-    public class GettingCamelFromStack : BaseClass
+    internal class GettingCamelFromStack : BaseClass
     {
         [SetUp]
         public override void Setup()
