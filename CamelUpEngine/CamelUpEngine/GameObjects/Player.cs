@@ -1,4 +1,6 @@
-﻿namespace CamelUpEngine
+﻿using System;
+
+namespace CamelUpEngine.GameObjects
 {
     public interface IPlayer
     {
@@ -11,7 +13,7 @@
     internal sealed class Player : IPlayer
     {
         public string Name { get; }
-        public int Coins { get; }
+        public int Coins { get; private set; }
 
         private Player() { }
         public Player(string name)
@@ -19,5 +21,9 @@
             Name = name;
             Coins = IPlayer.INITIAL_COINS_COUNT;
         }
+
+        public void AddCoins(int count) => Coins = Math.Max(Coins + count, 0);
+
+        public AudienceTile GetAudienceTile(AudienceTileSide audienceTileSide) => new(this, audienceTileSide);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace CamelUpEngine.Exceptions
+﻿using CamelUpEngine.Core;
+
+namespace CamelUpEngine.Exceptions
 {
     public abstract class ColourException : CamelUpGameException
     {

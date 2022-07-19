@@ -1,5 +1,6 @@
-using CamelUpEngine;
+using CamelUpEngine.Core;
 using CamelUpEngine.Exceptions.CamelsExceptions;
+using CamelUpEngine.GameTools;
 using NUnit.Framework;
 using System.Linq;
 
@@ -7,38 +8,34 @@ namespace TestCamelUpEngine.CamelsOnField
 {
     internal class GettingCamelFromStack : BaseClass
     {
+        private const int FIRST = 0;
+        private const int MIDDLE = 3; // CamelMoveTester.Camels.Count / 2
+        private const int LAST = 5; // CamelMoveTester.Camels.Count - 1
+
         [SetUp]
         public override void Setup()
         {
             base.Setup();
-            field.PutCamelsOnTop(Camels.ToList());
+            tester.PutCamelsOnTop(CamelMoveTester.Camels.ToList());
         }
 
         [Test, Sequential]
-        public void TestGettingFirst() => TestGettingNth(0);
+        public void TestGettingNth([Values(FIRST, MIDDLE, LAST)] int index)
+        {
+            var takenCamels = tester.TakeOffCamel(CamelMoveTester.Camels.ToArray()[index].Colour);
+            var camelsAfterTakeOff = tester.FieldCamels.ToList();
 
-        [Test, Sequential]
-        public void TestGettingMiddle() => TestGettingNth(Camels.Count / 2);
-
-        [Test, Sequential]
-        public void TestGettingLast() => TestGettingNth(Camels.Count - 1);
+            Assert.Multiple(() =>
+            {
+                CollectionAssert.AreEqual(CamelMoveTester.Camels.Take(index + 1).GetColours(), takenCamels.GetColours());
+                CollectionAssert.AreEqual(CamelMoveTester.Camels.Skip(index + 1).GetColours(), camelsAfterTakeOff.GetColours());
+            });
+        }
 
         [Test, Sequential]
         public void TestGettingNotExisting()
         {
-            Assert.Throws(Is.InstanceOf<NoCamelFoundException>(), () => field.TakeOffCamel(Colour.Violet));
-        }
-
-        private void TestGettingNth(int index)
-        {
-            var takenCamels = field.TakeOffCamel(Camels.ToArray()[index].Colour);
-            var camelsAfterTakeOff = field.GetCamels().ToList();
-
-            Assert.Multiple(() =>
-            {
-                CollectionAssert.AreEqual(Camels.Take(index + 1).GetColours(), takenCamels.GetColours());
-                CollectionAssert.AreEqual(Camels.Skip(index + 1).GetColours(), camelsAfterTakeOff.GetColours());
-            });
+            Assert.Throws(Is.InstanceOf<NoCamelFoundException>(), () => tester.TakeOffCamel(Colour.Violet));
         }
     }
 }

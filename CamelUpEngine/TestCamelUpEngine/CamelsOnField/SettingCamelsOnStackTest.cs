@@ -1,4 +1,5 @@
-﻿using CamelUpEngine;
+﻿using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameTools;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,39 +8,39 @@ namespace TestCamelUpEngine.CamelsOnField
 {
     internal class SettingCamelsOnStackTest : BaseClass
     {
-        private static IReadOnlyCollection<Camel> CamelsFirstPack { get; } = Camels.Take(3).ToList();
-        private static IReadOnlyCollection<Camel> CamelsSecondPack { get; } = Camels.TakeLast(3).ToList();
-        private static IReadOnlyCollection<Camel> CamelBothPacks { get; } = CamelsSecondPack.Concat(CamelsFirstPack).ToList();
+        private static IReadOnlyCollection<ICamel> CamelsFirstPack { get; } = CamelMoveTester.Camels.Take(3).ToList();
+        private static IReadOnlyCollection<ICamel> CamelsSecondPack { get; } = CamelMoveTester.Camels.TakeLast(3).ToList();
+        private static IReadOnlyCollection<ICamel> CamelBothPacks { get; } = CamelsSecondPack.Concat(CamelsFirstPack).ToList();
 
         #region Field top
 
         [Test, Sequential]
         public void TestSettingSingleCamelsOnFieldTop()
         {
-            IList<Camel> addedCamels = new List<Camel>();
-            CollectionAssert.IsEmpty(field.GetCamels());
-            Camels.ToList().ForEach(camel => {
-                field.PutCamelsOnTop(new[] { camel });
+            IList<ICamel> addedCamels = new List<ICamel>();
+            CollectionAssert.IsEmpty(tester.FieldCamels);
+            CamelMoveTester.Camels.ToList().ForEach(camel => {
+                tester.PutCamelsOnTop(new[] { camel }.ToList());
                 addedCamels.Insert(0, camel);
-                CollectionAssert.AreEqual(addedCamels, field.GetCamels());
+                CollectionAssert.AreEqual(addedCamels, tester.FieldCamels);
             });
         }
 
         [Test, Sequential]
         public void TestSettingMultipleCamelsOnFieldTop()
         {
-            field.PutCamelsOnTop(Camels.ToList());
-            CollectionAssert.AreEqual(Camels, field.GetCamels());
+            tester.PutCamelsOnTop(CamelMoveTester.Camels.ToList());
+            CollectionAssert.AreEqual(CamelMoveTester.Camels, tester.FieldCamels);
         }
 
         [Test, Sequential]
         public void TestSettingPacksOfCamelsOnFieldTop()
         {
-            field.PutCamelsOnTop(CamelsFirstPack.ToList());
-            CollectionAssert.AreEqual(CamelsFirstPack, field.GetCamels());
+            tester.PutCamelsOnTop(CamelsFirstPack.ToList());
+            CollectionAssert.AreEqual(CamelsFirstPack, tester.FieldCamels);
 
-            field.PutCamelsOnTop(CamelsSecondPack.ToList());
-            CollectionAssert.AreEqual(CamelBothPacks, field.GetCamels());
+            tester.PutCamelsOnTop(CamelsSecondPack.ToList());
+            CollectionAssert.AreEqual(CamelBothPacks, tester.FieldCamels);
         }
 
         #endregion Field top
@@ -49,30 +50,30 @@ namespace TestCamelUpEngine.CamelsOnField
         [Test, Sequential]
         public void TestSettingSingleCamelsOnFieldBottom()
         {
-            IList<Camel> addedCamels = new List<Camel>();
-            CollectionAssert.IsEmpty(field.GetCamels());
-            Camels.ToList().ForEach(camel => {
-                field.PutCamelsOnBottom(new[] { camel });
+            IList<ICamel> addedCamels = new List<ICamel>();
+            CollectionAssert.IsEmpty(tester.FieldCamels);
+            CamelMoveTester.Camels.ToList().ForEach(camel => {
+                tester.PutCamelsOnBottom(new[] { camel }.ToList());
                 addedCamels.Add(camel);
-                CollectionAssert.AreEqual(addedCamels, field.GetCamels());
+                CollectionAssert.AreEqual(addedCamels, tester.FieldCamels);
             });
         }
 
         [Test, Sequential]
         public void TestSettingMultipleCamelsOnFieldBottom()
         {
-            field.PutCamelsOnBottom(Camels.ToList());
-            CollectionAssert.AreEqual(Camels, field.GetCamels());
+            tester.PutCamelsOnBottom(CamelMoveTester.Camels.ToList());
+            CollectionAssert.AreEqual(CamelMoveTester.Camels, tester.FieldCamels);
         }
 
         [Test, Sequential]
         public void TestSettingPacksOfCamelsOnFieldBottom()
         {
-            field.PutCamelsOnTop(CamelsSecondPack.ToList());
-            CollectionAssert.AreEqual(CamelsSecondPack, field.GetCamels());
+            tester.PutCamelsOnTop(CamelsSecondPack.ToList());
+            CollectionAssert.AreEqual(CamelsSecondPack, tester.FieldCamels);
 
-            field.PutCamelsOnBottom(CamelsFirstPack.ToList());
-            CollectionAssert.AreEqual(CamelBothPacks, field.GetCamels());
+            tester.PutCamelsOnBottom(CamelsFirstPack.ToList());
+            CollectionAssert.AreEqual(CamelBothPacks, tester.FieldCamels);
         }
 
         #endregion Field bottom

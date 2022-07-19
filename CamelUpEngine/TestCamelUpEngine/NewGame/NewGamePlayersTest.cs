@@ -1,5 +1,6 @@
 ﻿using CamelUpEngine;
 using CamelUpEngine.Exceptions.PlayersExceptions;
+using CamelUpEngine.GameObjects;
 using NUnit.Framework;
 using System.Linq;
 

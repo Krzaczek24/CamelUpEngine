@@ -1,4 +1,6 @@
-﻿namespace CamelUpEngine.Exceptions.CamelsExceptions
+﻿using CamelUpEngine.Core;
+
+namespace CamelUpEngine.Exceptions.CamelsExceptions
 {
     public class CamelAlreadyOnboardException : ColourException
     {

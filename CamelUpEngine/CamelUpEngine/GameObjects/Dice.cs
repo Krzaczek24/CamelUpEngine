@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CamelUpEngine.Core;
+using System;
 using System.Linq;
 
-namespace CamelUpEngine
+namespace CamelUpEngine.GameObjects
 {
     public interface IDice : IColourable { }
 

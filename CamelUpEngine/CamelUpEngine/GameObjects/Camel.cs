@@ -1,11 +1,13 @@
-﻿namespace CamelUpEngine
+﻿using CamelUpEngine.Core;
+
+namespace CamelUpEngine.GameObjects
 {
     public interface ICamel : IColourable
     {
         public bool IsMad { get; }
     }
 
-    public sealed class Camel : ICamel
+    internal sealed class Camel : ICamel
     {
         public Colour Colour { get; }
         public bool IsMad => ColourHelper.IsMadColour(Colour);

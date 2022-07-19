@@ -1,11 +1,15 @@
-﻿using System;
+﻿using CamelUpEngine.Core;
+using CamelUpEngine.GameObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CamelUpEngine
+namespace CamelUpEngine.GameTools
 {
     public sealed class Dicer
     {
+        public const int DICE_DRAW_REWARD = 1;
+
         private IList<Dice> remainingDices = new List<Dice>();
         private IList<DrawnDice> drawnDices = new List<DrawnDice>();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => drawnDices.ToList();

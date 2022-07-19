@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CamelUpEngine
+namespace CamelUpEngine.Core
 {
     public enum Colour
     {

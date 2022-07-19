@@ -1,4 +1,6 @@
-﻿using CamelUpEngine;
+﻿using CamelUpEngine.Core;
+using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameTools;
 using NUnit.Framework;
 
 namespace TestCamelUpEngine.GameDicer

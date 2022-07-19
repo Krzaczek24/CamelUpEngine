@@ -1,5 +1,8 @@
-﻿using CamelUpEngine.Exceptions.CamelsExceptions;
+﻿using CamelUpEngine.Core;
+using CamelUpEngine.Exceptions.CamelsExceptions;
 using CamelUpEngine.Exceptions.PlayersExceptions;
+using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +15,22 @@ namespace CamelUpEngine
         public const int MINIMAL_PLAYERS_COUNT = 3;
         public const int MAXIMAL_PLAYERS_COUNT = 8;
         public const int DEFAULT_FIELDS_COUNT = 16;
+        public const int MAXIMAL_DRAWN_DICES = 5;
 
-        private readonly ICollection<Player> players;
-        private readonly ICollection<Camel> camels;
-        private readonly ICollection<Field> fields;
-        private readonly IDictionary<Colour, Field> camelPositions;
+        private readonly List<Player> players;
+        private readonly List<Camel> camels;
+        private readonly List<Field> fields;
+        private readonly Dictionary<Colour, Field> camelPositions;
         private readonly Dicer dicer = new Dicer();
 
         public IPlayer CurrentPlayer { get; private set; }
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
         public IReadOnlyCollection<ICamel> Camels => camels.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
+        public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
+
+        public bool GameOver { get; private set; }
+        public bool TurnIsOver => dicer.DrawnDices.Count() >= MAXIMAL_DRAWN_DICES;
 
         public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DEFAULT_FIELDS_COUNT)
         {
@@ -35,27 +43,104 @@ namespace CamelUpEngine
             SetNextPlayerAsCurrent();
         }
 
-        public void RollTheDice()
+        public IActionResult DrawTheDice()
         {
+            ((Player)CurrentPlayer).AddCoins(Dicer.DICE_DRAW_REWARD);
+
             IDrawnDice dice = dicer.DrawDice();
 
-            //przesunięcie wielbłąda
-            //dodanie piniążka
-            //popchnięcie tury
+            MoveCamel(dice.Colour, dice.Value);
+            //dodanie pieniążka jeśli
+            SetNextPlayerAsCurrent();
+
+            if (TurnIsOver)
+            {
+                GoToNextTurn();
+            }
+
+            return new ActionSuccess();
         }
 
-        public void BetTheWinner()
+        public IActionResult BetTheWinner()
         {
             //zabranie karty graczowi
             //położenie karty na odpowiednim stosie
-            //popchnięcie tury
+            SetNextPlayerAsCurrent();
+
+            return new ActionSuccess();
         }
 
-        public void BetTheLoser()
+        public IActionResult BetTheLoser()
         {
             //zabranie karty graczowi
             //położenie karty na odpowiednim stosie
-            //popchnięcie tury
+            SetNextPlayerAsCurrent();
+
+            return new ActionSuccess();
+        }
+
+        public IActionResult PlaceAudienceTile()
+        {
+            //zabranie kafelka z planszy jeśli był
+            //sprawdzenie sąsiednich pól
+            //położenie kafelka
+            SetNextPlayerAsCurrent();
+
+            return new ActionSuccess();
+        }
+
+        private void MoveCamel(Colour colour, int value)
+        {
+            bool isMadColour = ColourHelper.IsMadColour(colour);
+            if (isMadColour)
+            {
+                //jeśli ten szalony niczego nie wiezie, ale za to drugi wiezie to rusz tamtym
+                //jeśli ten szalony bezpośrednio nad sobą ma drugiego szalonego to rusz tym drugim
+            }
+
+            Field field = camelPositions[colour];
+            List<Camel> camels = field.TakeOffCamel(colour);
+            int newFieldIndex = field.Index + value - 1;
+            if (isMadColour && newFieldIndex < 0 || !isMadColour && newFieldIndex >= fields.Count)
+            {
+                //koniec gry
+            }
+            field = fields[newFieldIndex];
+            AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
+            if (audienceTile != null)
+            {
+                ((Player)audienceTile.Owner).AddCoins(1);
+                newFieldIndex = field.Index + audienceTile.MoveValue - 1;
+                field = fields[newFieldIndex];
+                if (audienceTile.Side == AudienceTileSide.Booing)
+                {
+                    field.PutCamelsOnBottom(camels);
+                    camelPositions[colour] = field;
+                    return;
+                }
+            }
+
+            field.PutCamelsOnTop(camels);
+            camelPositions[colour] = field;
+        }
+
+        private void GoToNextTurn()
+        {
+            RemoveAllAudienceTiles();
+            dicer.Reset();
+            //podsumowanie tury - rozdanie żetonów
+        }
+
+        private void RemoveAllAudienceTiles()
+        {
+            fields.ForEach(field => field.RemoveAudienceTile());
+        }
+
+        private void SetNextPlayerAsCurrent()
+        {
+            int currentIndex = players.ToList().IndexOf((Player)CurrentPlayer);
+            int playersCount = players.Count;
+            CurrentPlayer = players.ElementAt(++currentIndex % playersCount);
         }
 
         private void SetCamelsOnBoard()
@@ -65,13 +150,6 @@ namespace CamelUpEngine
             {
                 SetCamelInitialPosition(dice.Colour, dice.Value);
             }
-        }
-
-        private void SetNextPlayerAsCurrent()
-        {
-            int currentIndex = players.ToList().IndexOf((Player)CurrentPlayer);
-            int playersCount = players.Count;
-            CurrentPlayer = players.ElementAt(++currentIndex % playersCount);
         }
 
         private static IEnumerable<Player> GeneratePlayers(IEnumerable<string> playerNames, bool randomizePlayersOrder)
@@ -146,28 +224,10 @@ namespace CamelUpEngine
 
             var camel = camels.Single(camel => camel.Colour == camelColour);
             field = fields.Single(field => field.Index == position);
-            field.PutCamelsOnTop(camel);
+            field.PutCamelsOnTop(new[] { camel }.ToList());
             camelPositions[camel.Colour] = field;
         }
 
         private static bool IsInvalidPlayerName(string playerName) => !Regex.IsMatch(playerName, @"^\w+(\s?\w+)+$");
-
-        //public IField GetCamelField(Colour colour)
-        //{
-        //    return FindCamelField(colour) ?? throw new NoCamelFoundException(colour);
-        //}
-
-        //private Field FindCamelField(Colour colour)
-        //{
-        //    foreach (Field field in fields)
-        //    {
-        //        if (field.HasCamel(colour))
-        //        {
-        //            return field;
-        //        }
-        //    }
-
-        //    return null;
-        //}
     }
 }
