@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CamelUpEngine.Core.Actions.ActionSteps;
+using CamelUpEngine.Core.Enums;
+using CamelUpEngine.GameTools;
+using System;
 
 namespace CamelUpEngine.GameObjects
 {
@@ -22,7 +25,12 @@ namespace CamelUpEngine.GameObjects
             Coins = IPlayer.INITIAL_COINS_COUNT;
         }
 
-        public void AddCoins(int count) => Coins = Math.Max(Coins + count, 0);
+        public void AddCoins(int count)
+        {
+            int oldCount = Coins;
+            Coins = Math.Max(Coins + count, 0);
+            ActionCollector.AddAction(new CoinsAddedStep(this, Coins - oldCount));
+        }
 
         public AudienceTile GetAudienceTile(AudienceTileSide audienceTileSide) => new(this, audienceTileSide);
     }

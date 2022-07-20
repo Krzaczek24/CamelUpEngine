@@ -7,7 +7,7 @@ namespace TestCamelUpEngine.DuringGame
         [Test]
         public void Test()
         {
-            game.DrawTheDice();
+            throw new System.NotImplementedException();
         }
     }
 }

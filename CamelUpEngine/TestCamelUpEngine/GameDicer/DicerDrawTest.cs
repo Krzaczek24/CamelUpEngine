@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using NUnit.Framework;

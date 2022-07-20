@@ -1,5 +1,5 @@
 ﻿using CamelUpEngine;
-using CamelUpEngine.Core;
+using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using NUnit.Framework;
 using System.Collections.Generic;

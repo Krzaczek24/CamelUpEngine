@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Enums;
 using System;
 using System.Linq;
 
@@ -21,7 +21,7 @@ namespace CamelUpEngine.GameObjects
             Colour = colour;
         }
 
-        public DrawnDice Draw() => new DrawnDice(this);
+        public DrawnDice Draw() => new(this);
 
         public override string ToString() => $"{Colour} dice";
     }
@@ -46,7 +46,7 @@ namespace CamelUpEngine.GameObjects
         {
             if (colour == Colour.Mad)
             {
-                return ColourHelper.MadColours.OrderBy(c => Guid.NewGuid()).First();
+                return ColourHelper.MadColours.OrderBy(_ => Guid.NewGuid()).First();
             }
 
             return colour;

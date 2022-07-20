@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Enums;
 using System.Collections.Generic;
 using System.Linq;
 

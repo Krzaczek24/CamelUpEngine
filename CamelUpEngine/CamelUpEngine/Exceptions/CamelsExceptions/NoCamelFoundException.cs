@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Enums;
 
 namespace CamelUpEngine.Exceptions.CamelsExceptions
 {

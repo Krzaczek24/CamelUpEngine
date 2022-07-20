@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions.AudienceTilesExceptions;
 using CamelUpEngine.Exceptions.CamelsExceptions;
 using CamelUpEngine.Extensions;
@@ -31,9 +31,11 @@ namespace CamelUpEngine.GameObjects
             Index = number;
         }
 
+        private bool HasCamel(Colour colour) => Camels.Any(camel => camel.Colour == colour);
+
         public List<Camel> TakeOffCamel(Colour colour)
         {
-            if (!Camels.Any(c => c.Colour == colour))
+            if (!HasCamel(colour))
             {
                 throw new NoCamelOnFieldFoundException(colour, Index);
             }
@@ -43,9 +45,14 @@ namespace CamelUpEngine.GameObjects
             return takenCamels;
         }
 
-        public void PutCamelsOnTop(List<Camel> camels) => this.camels.InsertRange(0, camels);
-
-        public void PutCamelsOnBottom(List<Camel> camels) => this.camels.AddRange(camels);
+        public void PutCamels(List<Camel> camels, StackPutType putType = StackPutType.Top)
+        {
+            switch (putType)
+            {
+                case StackPutType.Top: this.camels.InsertRange(0, camels); return;
+                case StackPutType.Bottom: this.camels.AddRange(camels); return;
+            }
+        }
 
         public void RemoveAudienceTile() => AudienceTile = null;
 

@@ -1,11 +1,7 @@
-﻿namespace CamelUpEngine.GameObjects
-{
-    public enum AudienceTileSide
-    {
-        Booing = -1,
-        Cheering = 1
-    }
+﻿using CamelUpEngine.Core.Enums;
 
+namespace CamelUpEngine.GameObjects
+{
     public interface IAudienceTile
     {
         public IPlayer Owner { get; }

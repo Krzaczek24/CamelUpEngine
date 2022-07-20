@@ -1,4 +1,6 @@
-﻿using CamelUpEngine.Core;
+﻿using CamelUpEngine.Core.Actions;
+using CamelUpEngine.Core.Actions.ActionSteps;
+using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions.CamelsExceptions;
 using CamelUpEngine.Exceptions.PlayersExceptions;
 using CamelUpEngine.GameObjects;
@@ -21,7 +23,7 @@ namespace CamelUpEngine
         private readonly List<Camel> camels;
         private readonly List<Field> fields;
         private readonly Dictionary<Colour, Field> camelPositions;
-        private readonly Dicer dicer = new Dicer();
+        private readonly Dicer dicer = new Dicer();        
 
         public IPlayer CurrentPlayer { get; private set; }
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
@@ -40,25 +42,24 @@ namespace CamelUpEngine
             camelPositions = camels.ToDictionary(camel => camel.Colour, camel => (Field)null);
 
             SetCamelsOnBoard();
-            SetNextPlayerAsCurrent();
+            CurrentPlayer = players.First();
         }
 
         public IActionResult DrawTheDice()
         {
-            ((Player)CurrentPlayer).AddCoins(Dicer.DICE_DRAW_REWARD);
+            GiveCurrentPlayerACoin();
 
             IDrawnDice dice = dicer.DrawDice();
-
             MoveCamel(dice.Colour, dice.Value);
-            //dodanie pieniążka jeśli
-            SetNextPlayerAsCurrent();
 
             if (TurnIsOver)
             {
                 GoToNextTurn();
             }
 
-            return new ActionSuccess();
+            SetNextPlayerAsCurrent();
+
+            return ActionCollector.GetActions();
         }
 
         public IActionResult BetTheWinner()
@@ -67,7 +68,7 @@ namespace CamelUpEngine
             //położenie karty na odpowiednim stosie
             SetNextPlayerAsCurrent();
 
-            return new ActionSuccess();
+            return ActionCollector.GetActions();
         }
 
         public IActionResult BetTheLoser()
@@ -76,7 +77,7 @@ namespace CamelUpEngine
             //położenie karty na odpowiednim stosie
             SetNextPlayerAsCurrent();
 
-            return new ActionSuccess();
+            return ActionCollector.GetActions();
         }
 
         public IActionResult PlaceAudienceTile()
@@ -86,8 +87,10 @@ namespace CamelUpEngine
             //położenie kafelka
             SetNextPlayerAsCurrent();
 
-            return new ActionSuccess();
+            return ActionCollector.GetActions();
         }
+        
+        private void GiveCurrentPlayerACoin() => ((Player)CurrentPlayer).AddCoins(Dicer.DICE_DRAW_REWARD);
 
         private void MoveCamel(Colour colour, int value)
         {
@@ -104,23 +107,25 @@ namespace CamelUpEngine
             if (isMadColour && newFieldIndex < 0 || !isMadColour && newFieldIndex >= fields.Count)
             {
                 //koniec gry
+                //ActionCollector.AddAction(new GameOverStep());
             }
-            field = fields[newFieldIndex];
+            ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex]));
             AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
             if (audienceTile != null)
             {
+                ActionCollector.AddAction(new CamelsStoodOnAudienceTileStep(audienceTile));
                 ((Player)audienceTile.Owner).AddCoins(1);
                 newFieldIndex = field.Index + audienceTile.MoveValue - 1;
-                field = fields[newFieldIndex];
+                ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex], audienceTile.Side.ToStackPutType()));
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
-                    field.PutCamelsOnBottom(camels);
+                    field.PutCamels(camels, StackPutType.Bottom);
                     camelPositions[colour] = field;
                     return;
                 }
             }
 
-            field.PutCamelsOnTop(camels);
+            field.PutCamels(camels);
             camelPositions[colour] = field;
         }
 
@@ -129,18 +134,20 @@ namespace CamelUpEngine
             RemoveAllAudienceTiles();
             dicer.Reset();
             //podsumowanie tury - rozdanie żetonów
+
+            //dodanie akcji podsumowania
+
+            //dodanie akcji nowej tury
         }
 
-        private void RemoveAllAudienceTiles()
-        {
-            fields.ForEach(field => field.RemoveAudienceTile());
-        }
+        private void RemoveAllAudienceTiles() => fields.ForEach(field => field.RemoveAudienceTile());
 
         private void SetNextPlayerAsCurrent()
         {
             int currentIndex = players.ToList().IndexOf((Player)CurrentPlayer);
             int playersCount = players.Count;
             CurrentPlayer = players.ElementAt(++currentIndex % playersCount);
+            ActionCollector.AddAction(new ChangedCurrentPlayerStep(CurrentPlayer));
         }
 
         private void SetCamelsOnBoard()
@@ -224,7 +231,7 @@ namespace CamelUpEngine
 
             var camel = camels.Single(camel => camel.Colour == camelColour);
             field = fields.Single(field => field.Index == position);
-            field.PutCamelsOnTop(new[] { camel }.ToList());
+            field.PutCamels(new[] { camel }.ToList());
             camelPositions[camel.Colour] = field;
         }
 

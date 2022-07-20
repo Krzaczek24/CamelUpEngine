@@ -1,6 +1,8 @@
-﻿namespace CamelUpEngine.Exceptions.AudienceTilesExceptions
+﻿using CamelUpEngine.Core.Actions;
+
+namespace CamelUpEngine.Exceptions.AudienceTilesExceptions
 {
-    public class PuttingAudienceTileNotAllowedException : CamelUpGameException
+    public class PuttingAudienceTileNotAllowedException : CamelUpGameException, IActionStep
     {
         public int FieldIndex { get; }
 
