@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CamelUpEngine.Core.Actions.ActionSteps
 {
-    public interface ICamelMovedStep
+    public interface ICamelMovedStep : IActionStep
     {
         public IReadOnlyCollection<ICamel> Camels { get; }
         public IField From { get; }
@@ -12,7 +12,8 @@ namespace CamelUpEngine.Core.Actions.ActionSteps
         public StackPutType PutType { get; }
     }
 
-    internal class CamelsMovedStep : ActionStep, ICamelMovedStep
+    //internal class CamelsMovedStep : ActionStep, ICamelMovedStep
+    internal class CamelsMovedStep : ICamelMovedStep
     {
         public IReadOnlyCollection<ICamel> Camels { get; }
         public IField From { get; }

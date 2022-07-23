@@ -58,9 +58,17 @@ namespace CamelUpEngine.GameObjects
 
         public void PutAudienceTile(AudienceTile audienceTile)
         {
-            if (!PossibleToPutAudienceTile)
+            if (Index == 1)
             {
-                throw new PuttingAudienceTileNotAllowedException(Index);
+                throw new PuttingAudienceTileOnStartFieldException(Index);
+            }
+            else if (AudienceTile != null)
+            {
+                throw new FieldAlreadyOccupiedByAudienceTileExcception(Index);
+            }
+            else if (Camels.Any())
+            {
+                throw new FieldOccupiedByCamelException(Index);
             }
 
             AudienceTile = audienceTile;

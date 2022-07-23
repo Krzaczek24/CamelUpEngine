@@ -2,13 +2,14 @@
 
 namespace CamelUpEngine.Core.Actions.ActionSteps
 {
-    public interface ICoinsAddedStep
+    public interface ICoinsAddedStep : IActionStep
     {
         public IPlayer Player { get; }
         public int CoinsCount { get; }
     }
 
-    internal class CoinsAddedStep : ActionStep, ICoinsAddedStep
+    //internal class CoinsAddedStep : ActionStep, ICoinsAddedStep
+    internal class CoinsAddedStep : ICoinsAddedStep
     {
         public IPlayer Player { get; }
         public int CoinsCount { get; }

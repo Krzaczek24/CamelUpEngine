@@ -1,7 +1,9 @@
 ﻿using CamelUpEngine.Core.Actions;
 using CamelUpEngine.Core.Actions.ActionSteps;
 using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Exceptions.AudienceTilesExceptions;
 using CamelUpEngine.Exceptions.CamelsExceptions;
+using CamelUpEngine.Exceptions.FieldsExceptions;
 using CamelUpEngine.Exceptions.PlayersExceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
@@ -80,11 +82,26 @@ namespace CamelUpEngine
             return ActionCollector.GetActions();
         }
 
-        public IActionResult PlaceAudienceTile()
+        public IActionResult PlaceAudienceTile(int fieldIndex, AudienceTileSide audienceTileSide)
         {
-            //zabranie kafelka z planszy jeśli był
-            //sprawdzenie sąsiednich pól
-            //położenie kafelka
+            if (fieldIndex < 1 || fieldIndex > fields.Count)
+            {
+                throw new FieldNotFoundException(fieldIndex);
+            }
+            
+            Field previousField = fields.SingleOrDefault(field => field.Index == fieldIndex - 1);
+            Field nextField = fields.SingleOrDefault(field => field.Index == fieldIndex + 1);
+            if (previousField?.AudienceTile != null || nextField.AudienceTile != null)
+            {
+                throw new NearbyFieldOccupiedByAudienceTileException(fieldIndex);
+            }
+
+            Field playersAudienceTilePreviousField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == CurrentPlayer);
+            Field targetField = fields.Single(field => field.Index == fieldIndex);
+            targetField.PutAudienceTile(((Player)CurrentPlayer).GetAudienceTile(audienceTileSide));
+            playersAudienceTilePreviousField?.RemoveAudienceTile();
+            ActionCollector.AddAction(new AudienceTilePlacementStep(targetField));
+
             SetNextPlayerAsCurrent();
 
             return ActionCollector.GetActions();
@@ -120,13 +137,13 @@ namespace CamelUpEngine
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
                     field.PutCamels(camels, StackPutType.Bottom);
-                    camelPositions[colour] = field;
+                    camels.ForEach(camel => camelPositions[camel.Colour] = field);
                     return;
                 }
             }
 
             field.PutCamels(camels);
-            camelPositions[colour] = field;
+            camels.ForEach(camel => camelPositions[camel.Colour] = field);
         }
 
         private void GoToNextTurn()
