@@ -1,10 +1,10 @@
 ﻿using CamelUpEngine;
-using CamelUpEngine.Exceptions.PlayersExceptions;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using NUnit.Framework;
 using System.Linq;
 
-namespace TestCamelUpEngine.NewGame
+namespace TestCamelUpEngine.GameInitialization
 {
     internal class NewGamePlayersTest : BaseClass
     {

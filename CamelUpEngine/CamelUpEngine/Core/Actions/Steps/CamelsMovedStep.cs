@@ -2,7 +2,7 @@
 using CamelUpEngine.GameObjects;
 using System.Collections.Generic;
 
-namespace CamelUpEngine.Core.Actions.ActionSteps
+namespace CamelUpEngine.Core.Actions.Steps
 {
     public interface ICamelMovedStep : IActionStep
     {
@@ -12,7 +12,6 @@ namespace CamelUpEngine.Core.Actions.ActionSteps
         public StackPutType PutType { get; }
     }
 
-    //internal class CamelsMovedStep : ActionStep, ICamelMovedStep
     internal class CamelsMovedStep : ICamelMovedStep
     {
         public IReadOnlyCollection<ICamel> Camels { get; }

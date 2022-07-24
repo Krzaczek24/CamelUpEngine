@@ -1,6 +1,5 @@
 ﻿using CamelUpEngine.Core.Enums;
-using CamelUpEngine.Exceptions.AudienceTilesExceptions;
-using CamelUpEngine.Exceptions.CamelsExceptions;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
 using System.Collections.Generic;
 using System.Linq;

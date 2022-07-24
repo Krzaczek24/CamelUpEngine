@@ -1,13 +1,12 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.ActionSteps
+namespace CamelUpEngine.Core.Actions.Steps
 {
     public interface ICamelsStoodOnAudienceTileStep : IActionStep
     {
         public IAudienceTile AudienceTile { get; }
     }
 
-    //internal class CamelsStoodOnAudienceTileStep : ActionStep, ICamelsStoodOnAudienceTileStep
     internal class CamelsStoodOnAudienceTileStep : ICamelsStoodOnAudienceTileStep
     {
         public IAudienceTile AudienceTile { get; }

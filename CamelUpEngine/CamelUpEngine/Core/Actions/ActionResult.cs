@@ -6,16 +6,16 @@ namespace CamelUpEngine.Core.Actions
 {
     public interface IActionResult
     {
-        public IReadOnlyCollection<IActionStep> Actions { get; }
-        public bool Success => Actions.Last() as CamelUpGameException == null;
+        public IReadOnlyCollection<IActionStep> Steps { get; }
+        public bool Success => !(Steps.Last() is CamelUpGameException);
     }
 
     internal class ActionResult : IActionResult
     {
-        private List<IActionStep> actions = new();
+        private List<IActionStep> steps = new();
 
-        public IReadOnlyCollection<IActionStep> Actions => actions;
+        public IReadOnlyCollection<IActionStep> Steps => steps;
         
-        public void AddActionStep(IActionStep action) => actions.Add(action);
+        public void AddActionStep(IActionStep action) => steps.Add(action);
     }
 }

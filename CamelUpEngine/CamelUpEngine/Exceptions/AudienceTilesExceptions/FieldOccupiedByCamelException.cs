@@ -1,6 +1,6 @@
 ﻿using CamelUpEngine.Core.Enums;
 
-namespace CamelUpEngine.Exceptions.AudienceTilesExceptions
+namespace CamelUpEngine.Exceptions
 {
     public class FieldOccupiedByCamelException : PuttingAudienceTileNotAllowedException
     {

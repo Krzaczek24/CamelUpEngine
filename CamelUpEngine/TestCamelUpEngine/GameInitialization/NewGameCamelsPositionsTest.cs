@@ -1,11 +1,11 @@
 ﻿using CamelUpEngine;
-using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.Helpers;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestCamelUpEngine.NewGame
+namespace TestCamelUpEngine.GameInitialization
 {
     internal class NewGameCamelsPositionsTest : BaseClass
     {

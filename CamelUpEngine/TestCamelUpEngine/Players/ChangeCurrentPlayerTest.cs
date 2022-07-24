@@ -1,10 +1,15 @@
-﻿using NUnit.Framework;
+﻿using CamelUpEngine;
+using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace TestCamelUpEngine.DuringGame
+namespace TestCamelUpEngine.Players
 {
-    internal class ChangeCurrentPlayerTest : BaseClass
+    internal class ChangeCurrentPlayerTest
     {
+        protected static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
+        protected Game game = new(players);
+
         [Test]
         public void TestIfCurrentPlayerChanges()
         {

@@ -1,6 +1,6 @@
 ﻿using CamelUpEngine.Core.Enums;
 
-namespace CamelUpEngine.Exceptions.CamelsExceptions
+namespace CamelUpEngine.Exceptions
 {
     public class NoCamelOnFieldFoundException : NoCamelFoundException
     {

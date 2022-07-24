@@ -1,4 +1,4 @@
-﻿namespace CamelUpEngine.Exceptions.PlayersExceptions
+﻿namespace CamelUpEngine.Exceptions
 {
     public class NotUniquePlayersNameException : CamelUpGameException
     {

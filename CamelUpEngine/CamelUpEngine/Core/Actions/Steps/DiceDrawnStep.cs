@@ -1,13 +1,12 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.ActionSteps
+namespace CamelUpEngine.Core.Actions.Steps
 {
     public interface IDiceDrawnStep : IActionStep
     {
         public IDrawnDice DrawnDice { get; }
     }
 
-    //internal class DiceDrawnStep : ActionStep, IDiceDrawnStep
     internal class DiceDrawnStep : IDiceDrawnStep
     {
         public IDrawnDice DrawnDice { get; }

@@ -1,4 +1,4 @@
-﻿namespace CamelUpEngine.Exceptions.FieldsExceptions
+﻿namespace CamelUpEngine.Exceptions
 {
     public class FieldNotFoundException : CamelUpGameException
     {

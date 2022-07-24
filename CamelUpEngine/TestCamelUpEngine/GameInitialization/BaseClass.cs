@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace TestCamelUpEngine.NewGame
+namespace TestCamelUpEngine.GameInitialization
 {
     internal abstract class BaseClass
     {

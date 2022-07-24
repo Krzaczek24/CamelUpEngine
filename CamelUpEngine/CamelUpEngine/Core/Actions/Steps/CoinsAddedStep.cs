@@ -1,6 +1,6 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.ActionSteps
+namespace CamelUpEngine.Core.Actions.Steps
 {
     public interface ICoinsAddedStep : IActionStep
     {
@@ -8,7 +8,6 @@ namespace CamelUpEngine.Core.Actions.ActionSteps
         public int CoinsCount { get; }
     }
 
-    //internal class CoinsAddedStep : ActionStep, ICoinsAddedStep
     internal class CoinsAddedStep : ICoinsAddedStep
     {
         public IPlayer Player { get; }

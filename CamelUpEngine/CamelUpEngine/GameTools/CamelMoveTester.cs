@@ -19,8 +19,6 @@ namespace CamelUpEngine.GameTools
 
         private Field field = new Field(0);
 
-        public CamelMoveTester() { }
-
         public IReadOnlyCollection<ICamel> FieldCamels => field.Camels;
 
         public void ResetField() => field = new Field(0);

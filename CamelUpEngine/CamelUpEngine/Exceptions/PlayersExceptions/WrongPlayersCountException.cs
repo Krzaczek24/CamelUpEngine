@@ -1,6 +1,6 @@
-﻿namespace CamelUpEngine.Exceptions.PlayersExceptions
+﻿namespace CamelUpEngine.Exceptions
 {
-    public class WrongPlayersCountException : CamelUpGameException
+    public abstract class WrongPlayersCountException : CamelUpGameException
     {
         public int ActualPlayersCount { get; }
 

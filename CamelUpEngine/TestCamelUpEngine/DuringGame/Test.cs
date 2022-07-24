@@ -4,15 +4,9 @@ using System.Collections.Generic;
 
 namespace TestCamelUpEngine.DuringGame
 {
-    internal abstract class BaseClass
+    internal class Test
     {
         protected static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
-        protected Game game;
-
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            game = new Game(players);
-        }
+        protected Game game = new(players);
     }
 }

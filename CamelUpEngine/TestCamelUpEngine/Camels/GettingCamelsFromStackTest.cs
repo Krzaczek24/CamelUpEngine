@@ -1,21 +1,24 @@
 using CamelUpEngine.Core.Enums;
-using CamelUpEngine.Exceptions.CamelsExceptions;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameTools;
+using CamelUpEngine.Helpers;
 using NUnit.Framework;
 using System.Linq;
 
-namespace TestCamelUpEngine.CamelsOnField
+namespace TestCamelUpEngine.Camels
 {
-    internal class GettingCamelFromStack : BaseClass
+    internal class GettingCamelFromStack
     {
         private const int FIRST = 0;
         private const int MIDDLE = 3; // CamelMoveTester.Camels.Count / 2
         private const int LAST = 5; // CamelMoveTester.Camels.Count - 1
 
+        private readonly CamelMoveTester tester = new();
+
         [SetUp]
-        public override void Setup()
+        public void Setup()
         {
-            base.Setup();
+            tester.ResetField();
             tester.PutCamelsOnTop(CamelMoveTester.Camels.ToList());
         }
 

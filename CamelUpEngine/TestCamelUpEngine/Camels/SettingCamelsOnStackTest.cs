@@ -4,13 +4,21 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestCamelUpEngine.CamelsOnField
+namespace TestCamelUpEngine.Camels
 {
-    internal class SettingCamelsOnStackTest : BaseClass
+    internal class SettingCamelsOnStackTest
     {
         private static IReadOnlyCollection<ICamel> CamelsFirstPack { get; } = CamelMoveTester.Camels.Take(3).ToList();
         private static IReadOnlyCollection<ICamel> CamelsSecondPack { get; } = CamelMoveTester.Camels.TakeLast(3).ToList();
         private static IReadOnlyCollection<ICamel> CamelBothPacks { get; } = CamelsSecondPack.Concat(CamelsFirstPack).ToList();
+
+        private readonly CamelMoveTester tester = new();
+
+        [SetUp]
+        public void Setup()
+        {
+            tester.ResetField();
+        }
 
         #region Field top
 

@@ -1,9 +1,8 @@
-﻿using CamelUpEngine.Core.Actions;
-using CamelUpEngine.Core.Enums;
+﻿using CamelUpEngine.Core.Enums;
 
-namespace CamelUpEngine.Exceptions.AudienceTilesExceptions
+namespace CamelUpEngine.Exceptions
 {
-    public abstract class PuttingAudienceTileNotAllowedException : CamelUpGameException//, IActionStep
+    public abstract class PuttingAudienceTileNotAllowedException : CamelUpGameException
     {
         public int FieldIndex { get; }
         public abstract AudienceTileNotAllowedReason NotAllowedReason { get; }
