@@ -150,8 +150,6 @@ namespace CamelUpEngine
 
         private void RemoveAllAudienceTiles() => fields.ForEach(field => field.RemoveAudienceTile());
 
-        private bool AreMadCamelsOnTheSameField() => camelPositions[Colour.White] == camelPositions[Colour.Black];
-
         private void SetNextPlayerAsCurrent()
         {
             int currentIndex = players.ToList().IndexOf((Player)CurrentPlayer);
@@ -163,32 +161,31 @@ namespace CamelUpEngine
         private void MoveCamel(Colour colour, int value)
         {
             bool isMadColour = ColourHelper.IsMadColour(colour);
-            if (isMadColour)
+            if (isMadColour && ShouldSwitchMadColour(colour))
             {
-                // TODO: jeśli ten szalony niczego nie wiezie, ale za to drugi wiezie to rusz tamtym
-                // TODO: jeśli ten szalony bezpośrednio nad sobą ma drugiego szalonego to rusz tym drugim
-                if (AreMadCamelsOnTheSameField())
-                {
-
-                }
+                colour = ColourHelper.GetOppositeMadColour(colour);
             }
 
+            // camel move
             Field field = camelPositions[colour];
             List<Camel> camels = field.TakeOffCamel(colour);
-            int newFieldIndex = field.Index + value - 1;
-            if (isMadColour && newFieldIndex < 0 || !isMadColour && newFieldIndex >= fields.Count)
+            int newFieldIndex = field.Index + value;
+            if (isMadColour && newFieldIndex <= 0 
+            || !isMadColour && newFieldIndex > fields.Count)
             {
                 GameIsOver = true;
                 return;
             }
-            ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex]));
+            ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex - 1]));
+
+            // additional move if camel ended move on audience tile
             AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
             if (audienceTile != null)
             {
                 ActionCollector.AddAction(new CamelsStoodOnAudienceTileStep(audienceTile));
                 ((Player)audienceTile.Owner).AddCoins(1);
-                newFieldIndex = field.Index + audienceTile.MoveValue - 1;
-                ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex], audienceTile.Side.ToStackPutType()));
+                newFieldIndex = field.Index + audienceTile.MoveValue;
+                ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex - 1], audienceTile.Side.ToStackPutType()));
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
                     field.PutCamels(camels, StackPutType.Bottom);
@@ -200,5 +197,26 @@ namespace CamelUpEngine
             field.PutCamels(camels);
             camels.ForEach(camel => camelPositions[camel.Colour] = field);
         }
+
+        private bool ShouldSwitchMadColour(Colour colour)
+        {
+            if (AreMadCamelsOnTheSameField() && IsNearestCamelOnBackMad(colour))
+            {
+                ActionCollector.AddAction(new MadCamelColourSwitchedStep(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne));
+                return true;
+            }
+
+            if (!AnyNotMadCamelsOnBack(colour) && AnyNotMadCamelsOnBack(ColourHelper.GetOppositeMadColour(colour)))
+            {
+                ActionCollector.AddAction(new MadCamelColourSwitchedStep(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels));
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool IsNearestCamelOnBackMad(Colour colour) => camelPositions[colour].Camels.TakeWhile(camel => camel.Colour == colour).LastOrDefault()?.IsMad ?? false;
+        private bool AnyNotMadCamelsOnBack(Colour colour) => camelPositions[colour].Camels.TakeWhile(camel => camel.Colour == colour).Where(camel => !camel.IsMad).Any();
+        private bool AreMadCamelsOnTheSameField() => camelPositions[Colour.White] == camelPositions[Colour.Black];
     }
 }

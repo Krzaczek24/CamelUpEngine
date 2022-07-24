@@ -14,5 +14,7 @@ namespace CamelUpEngine.Helpers
         public static IEnumerable<Colour> GetColours(this IEnumerable<IColourable> source) => source.Select(colourable => colourable.Colour).ToList();
 
         public static bool IsMadColour(Colour colour) => MadColours.Contains(colour);
+
+        public static Colour GetOppositeMadColour(Colour colour) => MadColours.Except(new[] { colour }).Single();
     }
 }

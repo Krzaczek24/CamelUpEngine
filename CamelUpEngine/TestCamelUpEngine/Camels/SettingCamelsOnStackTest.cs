@@ -15,7 +15,7 @@ namespace TestCamelUpEngine.Camels
         private readonly CamelMoveTester tester = new();
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
             tester.ResetField();
         }
