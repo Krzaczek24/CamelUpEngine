@@ -7,8 +7,17 @@ using System.Linq;
 
 namespace TestCamelUpEngine.GameInitialization
 {
-    internal class NewGameCamelsPositionsTest : BaseClass
+    internal class NewGameCamelsPositionsTest
     {
+        private static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
+        private Game game;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            game = new Game(players);
+        }
+
         [Test]
         public void TestIfGameGotAllField()
         {

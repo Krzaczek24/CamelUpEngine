@@ -24,7 +24,7 @@ namespace TestCamelUpEngine.Camels
         {
             var camelsInitialFieldIndexes = game.CamelPositions;
 
-            var drawDiceActionResult = game.DrawTheDice();
+            var drawDiceActionResult = game.DrawDice();
             var drawnDiceActionStep = drawDiceActionResult.GetActionStep<IDiceDrawnStep>();
             var drawnDice = drawnDiceActionStep.DrawnDice;
 

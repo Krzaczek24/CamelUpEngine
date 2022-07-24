@@ -2,12 +2,22 @@
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace TestCamelUpEngine.GameInitialization
 {
-    internal class NewGamePlayersTest : BaseClass
+    internal class NewGamePlayersTest
     {
+        private static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
+        private Game game;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            game = new Game(players);
+        }
+
         [Test]
         public void TestAllPlayersAreSet() => CollectionAssert.AreEqual(players, game.Players.Select(player => player.Name));
 

@@ -29,5 +29,13 @@ namespace CamelUpEngine.Extensions
 
             return result;
         }
+
+        /// <summary>
+        /// Return random element from a sequence
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static T GetRandom<T>(this IEnumerable<T> source) => source.ElementAt(new Random().Next(source.Count()));
     }
 }

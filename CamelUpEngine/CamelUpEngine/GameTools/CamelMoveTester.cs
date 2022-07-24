@@ -1,4 +1,6 @@
-﻿using CamelUpEngine.Core.Enums;
+﻿#if DEBUG
+
+using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,3 +36,5 @@ namespace CamelUpEngine.GameTools
         private List<Camel> Convert(List<ICamel> camels) => camels.Cast<Camel>().ToList();
     }
 }
+
+#endif

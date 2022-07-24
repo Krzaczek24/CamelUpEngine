@@ -1,4 +1,6 @@
-﻿using CamelUpEngine.GameObjects;
+﻿#if DEBUG
+
+using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -87,3 +89,5 @@ namespace TestCamelUpEngine.Camels
         #endregion Field bottom
     }
 }
+
+#endif

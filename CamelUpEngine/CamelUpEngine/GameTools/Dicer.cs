@@ -8,12 +8,12 @@ using System.Linq;
 
 namespace CamelUpEngine.GameTools
 {
-    public sealed class Dicer
+    public class Dicer
     {
         public const int DICE_DRAW_REWARD = 1;
 
-        private IList<Dice> remainingDices = new List<Dice>();
-        private IList<DrawnDice> drawnDices = new List<DrawnDice>();
+        private readonly List<Dice> remainingDices = new();
+        private readonly List<DrawnDice> drawnDices = new();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => drawnDices.ToList();
 
         public Dicer()
@@ -23,7 +23,7 @@ namespace CamelUpEngine.GameTools
 
         public IDrawnDice DrawDice()
         {
-            Dice dice = remainingDices.OrderBy(d => Guid.NewGuid()).FirstOrDefault();
+            Dice dice = remainingDices.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
             if (dice == null)
             {
                 return null;

@@ -5,6 +5,7 @@ using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,8 @@ namespace CamelUpEngine
         private readonly List<Camel> camels;
         private readonly List<Field> fields;
         private readonly Dictionary<Colour, Field> camelPositions;
-        private readonly Dicer dicer = new Dicer();        
+        private readonly Dicer dicer = new();
+        private readonly TypingCardManager cardManager = new();
 
         public IPlayer CurrentPlayer { get; private set; }
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
@@ -42,7 +44,7 @@ namespace CamelUpEngine
             CurrentPlayer = players.First();
         }
 
-        public IActionResult DrawTheDice()
+        public IActionResult DrawDice()
         {
             if (GameIsOver)
             {
@@ -69,7 +71,7 @@ namespace CamelUpEngine
             return ActionCollector.GetActions();
         }
 
-        public IActionResult BetTheWinner()
+        public IActionResult MakeBet(Colour colour, BetType betType)
         {
             if (GameIsOver)
             {
@@ -78,21 +80,16 @@ namespace CamelUpEngine
 
             // TODO: zabranie karty graczowi
             // TODO: położenie karty na odpowiednim stosie
+
             SetNextPlayerAsCurrent();
 
             return ActionCollector.GetActions();
         }
 
-        public IActionResult BetTheLoser()
+        public IActionResult DrawTypingCard(Colour colour)
         {
-            if (GameIsOver)
-            {
-                throw new GameOverException();
-            }
-
-            // TODO: zabranie karty graczowi
-            // TODO: położenie karty na odpowiednim stosie
-            SetNextPlayerAsCurrent();
+            // TODO: pobranie karty typowania ze stosu
+            // TODO: dodanie graczowi karty
 
             return ActionCollector.GetActions();
         }

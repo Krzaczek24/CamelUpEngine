@@ -10,6 +10,7 @@ namespace CamelUpEngine.Helpers
         public static IEnumerable<Colour> MadColours { get; } = new[] { Colour.White, Colour.Black };
         public static IEnumerable<Colour> AllColours { get; } = Enum.GetValues<Colour>();
         public static IEnumerable<Colour> AllCamelColours { get; } = AllColours.Except(new[] { Colour.Mad });
+        public static IEnumerable<Colour> AllCardColours { get; } = AllColours.Except(MadColours).Except(new[] { Colour.Mad });
         public static IEnumerable<Colour> AllDiceColours { get; } = AllColours.Except(MadColours);
         public static IEnumerable<Colour> GetColours(this IEnumerable<IColourable> source) => source.Select(colourable => colourable.Colour).ToList();
 

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CamelUpEngineConsole", "Cam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CamelUpEngine", "..\CamelUpEngine\CamelUpEngine\CamelUpEngine.csproj", "{CF727AF7-27CD-4053-8E24-2579235CDA60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CamelUpEngineTests", "..\CamelUpEngine\CamelUpEngineTests\CamelUpEngineTests.csproj", "{8617FCBB-3728-4A52-A98D-D76B160193E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CamelUpEngineTests", "..\CamelUpEngine\CamelUpEngineTest\CamelUpEngineTests.csproj", "{8617FCBB-3728-4A52-A98D-D76B160193E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,3 +1,5 @@
+#if DEBUG
+
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameTools;
@@ -42,3 +44,5 @@ namespace TestCamelUpEngine.Camels
         }
     }
 }
+
+#endif

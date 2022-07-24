@@ -19,7 +19,7 @@ namespace TestCamelUpEngine.Players
             {
                 expectedPlayerName = playersList[i % playersList.Count];
                 Assert.AreEqual(expectedPlayerName, game.CurrentPlayer.Name);
-                game.DrawTheDice();
+                game.DrawDice();
             }
         }
     }
