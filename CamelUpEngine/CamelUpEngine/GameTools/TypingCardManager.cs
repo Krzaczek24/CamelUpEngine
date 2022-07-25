@@ -1,4 +1,5 @@
 ﻿using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
 using System.Collections.Generic;
@@ -34,6 +35,15 @@ namespace CamelUpEngine.GameTools
             }
         }
 
-        public ITypingCard DrawCard(Colour colour) => availableCards[colour].Pop();
+        public ITypingCard DrawCard(Colour colour)
+        {
+            if (availableCards.TryGetValue(colour, out Stack<TypingCard> stack)
+            && stack.TryPop(out TypingCard card))
+            {
+                return card;
+            }
+
+            throw new NoTypingCardsAvailableException(colour);
+        }
     }
 }

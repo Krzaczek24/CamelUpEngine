@@ -33,5 +33,7 @@ namespace CamelUpEngine.GameObjects
         }
 
         public AudienceTile GetAudienceTile(AudienceTileSide audienceTileSide) => new(this, audienceTileSide);
+
+        public override string ToString() => $"Player '{Name}'";
     }
 }

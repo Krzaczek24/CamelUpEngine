@@ -1,4 +1,5 @@
 ﻿using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
@@ -20,10 +21,9 @@ namespace TestCamelUpEngine.GameDicer
                 CollectionAssert.Contains(dicer.DrawnDices, dice);
             }
 
-            dice = dicer.DrawDice();
-            Assert.IsNull(dice);
             Assert.Multiple(() =>
             {
+                Assert.Throws<NoMoreDicesToDrawException>(() => dicer.DrawDice());
                 CollectionAssert.AllItemsAreNotNull(dicer.DrawnDices);
                 CollectionAssert.AllItemsAreUnique(dicer.DrawnDices.GetColours());
                 CollectionAssert.DoesNotContain(dicer.DrawnDices.GetColours(), Colour.Mad);

@@ -28,33 +28,31 @@ namespace TestCamelUpEngine.GameTypingCardManager
         [Test]
         public void TestDrawingCards()
         {
-            var expectedCards = TypingCardHelper.CardRepository.Where(card => card.Value == TypingCardValue.High).ToList();
-            Colour colour = Colour.Blue;
+            var expectedTopCards = TypingCardHelper.GetCards(TypingCardValue.High).ToList();
 
-            CheckDrawSingleCard(colour, TypingCardValue.High, ref expectedCards);
-            expectedCards.Add(TypingCardHelper.CardRepository.Single(card => card.Colour == colour && card.Value == TypingCardValue.Medium));
-            CollectionAssert.AreEquivalent(expectedCards, manager.AvailableCards);
-
-            CheckDrawSingleCard(colour, TypingCardValue.Medium, ref expectedCards);
-            expectedCards.Add(TypingCardHelper.CardRepository.Single(card => card.Colour == colour && card.Value == TypingCardValue.Low));
-            CollectionAssert.AreEquivalent(expectedCards, manager.AvailableCards);
-
-            CheckDrawSingleCard(colour, TypingCardValue.Low, ref expectedCards);
-            expectedCards.Add(TypingCardHelper.CardRepository.Single(card => card.Colour == colour && card.Value == TypingCardValue.Low));
-            CollectionAssert.AreEquivalent(expectedCards, manager.AvailableCards);
-
-            CheckDrawSingleCard(colour, TypingCardValue.Low, ref expectedCards);
-            CollectionAssert.AreEquivalent(expectedCards, manager.AvailableCards);
+            foreach (Colour colour in ColourHelper.AllCardColours)
+            {
+                var referenceStack = TypingCardHelper.GetStack(colour);
+                while (referenceStack.Any())
+                {
+                    CheckDrawSingleCard(ref referenceStack, ref expectedTopCards);
+                }
+            }
         }
 
-        private void CheckDrawSingleCard(Colour colour, TypingCardValue value, ref List<ITypingCard> expectedCards)
+        private void CheckDrawSingleCard(ref Stack<ITypingCard> expectedStack, ref List<ITypingCard> expectedTopCards)
         {
-            ITypingCard drawnCard = manager.DrawCard(colour);
-            Assert.Multiple(() => {
-                Assert.AreEqual(drawnCard.Colour, colour);
-                Assert.AreEqual(drawnCard.Value, value);
-            });
-            expectedCards = expectedCards.Where(card => card.Colour != colour).ToList();
+            ITypingCard expectedCard = expectedStack.Pop();
+            ITypingCard drawnCard = manager.DrawCard(expectedCard.Colour);
+
+            expectedTopCards = expectedTopCards.Where(card => card != expectedCard).ToList();
+            if (expectedStack.TryPeek(out ITypingCard nextCard))
+            {
+                expectedTopCards.Add(nextCard);
+            }
+
+            Assert.AreEqual(drawnCard, expectedCard);
+            CollectionAssert.AreEquivalent(expectedTopCards, manager.AvailableCards);
         }
     }
 }

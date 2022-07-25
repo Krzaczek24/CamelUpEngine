@@ -18,6 +18,8 @@ namespace CamelUpEngine.GameObjects
             Value = value;
         }
 
+        public override string ToString() => $"{Colour} typing card with value of {(int)Value}";
+
         public override bool Equals(object obj)
         {
             TypingCard other = obj as TypingCard;
@@ -26,9 +28,6 @@ namespace CamelUpEngine.GameObjects
             return Colour == other.Colour && Value == other.Value;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

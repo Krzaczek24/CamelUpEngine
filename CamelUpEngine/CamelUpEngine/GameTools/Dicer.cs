@@ -1,5 +1,6 @@
 ﻿using CamelUpEngine.Core.Actions.Steps;
 using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
 using System;
@@ -26,7 +27,7 @@ namespace CamelUpEngine.GameTools
             Dice dice = remainingDices.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
             if (dice == null)
             {
-                return null;
+                throw new NoMoreDicesToDrawException();
             }
             
             DrawnDice drawnDice = new(dice);

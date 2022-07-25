@@ -1,6 +1,8 @@
 ﻿using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
+using CamelUpEngine.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,5 +74,9 @@ namespace CamelUpEngine.GameObjects
 
             AudienceTile = audienceTile;
         }
+
+        public override string ToString() => $"{Index}. field {CamelsDesc()} and {AudienceTileDesc()}";
+        private string CamelsDesc() => camels.Any() ? $"with {camels.Count} camel{(camels.Count > 1 ? "s" : "")}" : "with no camels";
+        private string AudienceTileDesc() => $"with{(AudienceTile == null ? "out" : "")} audience tile";
     }
 }

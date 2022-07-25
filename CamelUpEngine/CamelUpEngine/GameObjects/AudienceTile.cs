@@ -19,5 +19,7 @@ namespace CamelUpEngine.GameObjects
             Owner = owner;
             Side = side;
         }
+
+        public override string ToString() => $"{Owner.Name}'s {Side.ToString().ToLower()} audience tile";
     }
 }

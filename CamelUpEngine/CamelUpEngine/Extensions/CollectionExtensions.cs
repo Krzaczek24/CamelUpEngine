@@ -37,5 +37,24 @@ namespace CamelUpEngine.Extensions
         /// <param name="source"></param>
         /// <returns></returns>
         public static T GetRandom<T>(this IEnumerable<T> source) => source.ElementAt(new Random().Next(source.Count()));
+
+        /// <summary>
+        /// Returns elements from a sequence as strings
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="transformFunction">Optional string transformation function</param>
+        /// <returns></returns>
+        public static IEnumerable<string> ToStrings<T>(this IEnumerable<T> source, Func<string, string> transformFunction = null)
+        {
+            var result = source.Select(item => item.ToString());
+
+            if (transformFunction != null)
+            {
+                result = result.Select(transformFunction);
+            }
+
+            return result;
+        }
     }
 }
