@@ -1,8 +1,6 @@
 ﻿using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
-using CamelUpEngine.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,20 +9,18 @@ namespace CamelUpEngine.GameObjects
     public interface IField
     {
         public int Index { get; }
-        public IReadOnlyCollection<ICamel> Camels { get; }
         public IAudienceTile AudienceTile { get; }
+        public IReadOnlyCollection<ICamel> Camels { get; }
     }
 
     internal sealed class Field : IField
     {
-        public int Index { get; }
+        private readonly List<Camel> camels = new();
 
-        private List<Camel> camels = new();
-        public IReadOnlyCollection<ICamel> Camels => camels;
-
-        public IAudienceTile AudienceTile { get; private set; }
-        
         public bool PossibleToPutAudienceTile => Index != 1 && !camels.Any() && AudienceTile == null;
+        public int Index { get; }
+        public IAudienceTile AudienceTile { get; private set; }
+        public IReadOnlyCollection<ICamel> Camels => camels;
 
         private Field() { }
         public Field(int number)

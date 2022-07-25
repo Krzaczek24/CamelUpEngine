@@ -16,12 +16,12 @@ namespace CamelUpEngine.GameTools
         {
             int playersCount = playerNames?.Count() ?? 0;
 
-            if (playersCount < Game.MINIMAL_PLAYERS_COUNT)
+            if (playersCount < Game.MinimalPlayersCount)
             {
                 throw new TooFewPlayersException(playersCount);
             }
 
-            if (playersCount > Game.MAXIMAL_PLAYERS_COUNT)
+            if (playersCount > Game.MaximalPlayersCount)
             {
                 throw new TooManyPlayersException(playersCount);
             }
@@ -58,9 +58,9 @@ namespace CamelUpEngine.GameTools
 
         public static IEnumerable<Field> GenerateFields(int fieldsCount)
         {
-            if (fieldsCount < Game.DEFAULT_FIELDS_COUNT)
+            if (fieldsCount < Game.DefaultFieldsCount)
             {
-                throw new ArgumentException($"Number of fields cannot be lesser than {Game.DEFAULT_FIELDS_COUNT}");
+                throw new ArgumentException($"Number of fields cannot be lesser than {Game.DefaultFieldsCount}");
             }
 
             for (int index = 1; index <= fieldsCount; index++)

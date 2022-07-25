@@ -2,7 +2,7 @@
 {
     public class TooFewPlayersException : WrongPlayersCountException
     {
-        public static int MinimalPlayersCount => Game.MINIMAL_PLAYERS_COUNT;
+        public static int MinimalPlayersCount => Game.MinimalPlayersCount;
 
         public TooFewPlayersException(int actualPlayersCount) : base(actualPlayersCount, $"Too few players, minimal players count is {MinimalPlayersCount}") { }
 

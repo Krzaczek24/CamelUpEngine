@@ -22,7 +22,7 @@ namespace TestCamelUpEngine.GameInitialization
         public void TestIfGameGotAllField()
         {
             var actualFieldIndexes = game.Fields.Select(field => field.Index);
-            var expectedIndexes = Enumerable.Range(1, Game.DEFAULT_FIELDS_COUNT);
+            var expectedIndexes = Enumerable.Range(1, Game.DefaultFieldsCount);
 
             CollectionAssert.AreEqual(expectedIndexes, actualFieldIndexes);
         }

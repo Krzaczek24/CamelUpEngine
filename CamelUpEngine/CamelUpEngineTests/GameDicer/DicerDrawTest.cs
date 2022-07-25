@@ -4,6 +4,7 @@ using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace TestCamelUpEngine.GameDicer
 {
@@ -38,9 +39,11 @@ namespace TestCamelUpEngine.GameDicer
         [Test]
         public void TestDicerInitialDraws()
         {
-            var dices = Dicer.DrawDicesForInitialCamelsPlacement();
+            IReadOnlyCollection<IDrawnDice> dices = null;
             Assert.Multiple(() =>
             {
+                Assert.DoesNotThrow(() => dices = Dicer.DrawDicesForInitialCamelsPlacement());
+                CollectionAssert.IsNotEmpty(dices);
                 CollectionAssert.AllItemsAreNotNull(dices);
                 CollectionAssert.AllItemsAreUnique(dices.GetColours());
                 CollectionAssert.DoesNotContain(dices.GetColours(), Colour.Mad);

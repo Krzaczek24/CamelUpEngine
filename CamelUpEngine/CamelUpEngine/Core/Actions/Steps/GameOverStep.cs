@@ -6,16 +6,16 @@ namespace CamelUpEngine.Core.Actions.Steps
 {
     public interface IGameOverStep : IActionStep
     {
-        public IReadOnlyCollection<IPlayer> Players { get; }
+        public IReadOnlyCollection<IPlayer> Winners { get; }
     }
 
     internal class GameOverStep : IGameOverStep
     {
-        public IReadOnlyCollection<IPlayer> Players { get; }
+        public IReadOnlyCollection<IPlayer> Winners { get; }
 
         public GameOverStep(Game game)
         {
-            Players = game.Players.OrderByDescending(player => player.Coins).ToList();
+            Winners = game.Players.OrderByDescending(player => player.Coins).ToList();
         }
     }
 }

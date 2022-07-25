@@ -40,13 +40,13 @@ namespace TestCamelUpEngine.GameTypingCardManager
             }
         }
 
-        private void CheckDrawSingleCard(ref Stack<ITypingCard> expectedStack, ref List<ITypingCard> expectedTopCards)
+        private void CheckDrawSingleCard(ref Stack<IAvailableTypingCard> expectedStack, ref List<IAvailableTypingCard> expectedTopCards)
         {
-            ITypingCard expectedCard = expectedStack.Pop();
-            ITypingCard drawnCard = manager.DrawCard(expectedCard.Colour);
+            IAvailableTypingCard expectedCard = expectedStack.Pop();
+            ITypingCard drawnCard = manager.DrawCard(expectedCard);
 
             expectedTopCards = expectedTopCards.Where(card => card != expectedCard).ToList();
-            if (expectedStack.TryPeek(out ITypingCard nextCard))
+            if (expectedStack.TryPeek(out IAvailableTypingCard nextCard))
             {
                 expectedTopCards.Add(nextCard);
             }

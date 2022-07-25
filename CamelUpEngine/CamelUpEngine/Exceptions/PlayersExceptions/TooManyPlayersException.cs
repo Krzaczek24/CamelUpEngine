@@ -2,7 +2,7 @@
 {
     public class TooManyPlayersException : WrongPlayersCountException
     {
-        public static int MaximalPlayersCount => Game.MAXIMAL_PLAYERS_COUNT;
+        public static int MaximalPlayersCount => Game.MaximalPlayersCount;
 
         public TooManyPlayersException(int actualPlayersCount) : base(actualPlayersCount, $"Too many players, maximal players count is {MaximalPlayersCount}") { }
 

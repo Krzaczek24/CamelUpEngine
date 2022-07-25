@@ -1,5 +1,4 @@
 ﻿using CamelUpEngine.Core.Actions.Steps;
-using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
@@ -11,7 +10,7 @@ namespace CamelUpEngine.GameTools
 {
     public class Dicer
     {
-        public const int DICE_DRAW_REWARD = 1;
+        public const int DiceDrawReward = 1;
 
         private readonly List<Dice> remainingDices = new();
         private readonly List<DrawnDice> drawnDices = new();
@@ -24,12 +23,7 @@ namespace CamelUpEngine.GameTools
 
         public IDrawnDice DrawDice()
         {
-            Dice dice = remainingDices.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
-            if (dice == null)
-            {
-                throw new NoMoreDicesToDrawException();
-            }
-            
+            Dice dice = remainingDices.OrderBy(_ => Guid.NewGuid()).FirstOrDefault() ?? throw new NoMoreDicesToDrawException();            
             DrawnDice drawnDice = new(dice);
             remainingDices.Remove(dice);
             drawnDices.Add(drawnDice);
@@ -39,12 +33,9 @@ namespace CamelUpEngine.GameTools
 
         public void Reset()
         {
-            remainingDices.Clear();
             drawnDices.Clear();
-            foreach (Colour colour in ColourHelper.AllDiceColours)
-            {
-                remainingDices.Add(new Dice(colour));
-            }
+            remainingDices.Clear();
+            remainingDices.AddRange(ColourHelper.AllDiceColours.Select(colour => new Dice(colour)));
         }
 
         public static IReadOnlyCollection<IDrawnDice> DrawDicesForInitialCamelsPlacement()

@@ -11,7 +11,7 @@ namespace CamelUpEngine.GameTools
     {
         private readonly static IReadOnlyCollection<TypingCardValue> initialValues = new[] { TypingCardValue.Low, TypingCardValue.Low, TypingCardValue.Medium, TypingCardValue.High };
         private Dictionary<Colour, Stack<TypingCard>> availableCards = new();
-        public IReadOnlyCollection<ITypingCard> AvailableCards => availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? card : null).Where(card => card != null).ToList();
+        public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card) : null).Where(card => card != null).ToList();
 
         public TypingCardManager()
         {
@@ -35,15 +35,15 @@ namespace CamelUpEngine.GameTools
             }
         }
 
-        public ITypingCard DrawCard(Colour colour)
+        public ITypingCard DrawCard(IAvailableTypingCard availableTypingCard)
         {
-            if (availableCards.TryGetValue(colour, out Stack<TypingCard> stack)
+            if (availableCards.TryGetValue(availableTypingCard.Colour, out Stack<TypingCard> stack)
             && stack.TryPop(out TypingCard card))
             {
                 return card;
             }
 
-            throw new NoTypingCardsAvailableException(colour);
+            throw new NoTypingCardsAvailableException(availableTypingCard.Colour);
         }
     }
 }

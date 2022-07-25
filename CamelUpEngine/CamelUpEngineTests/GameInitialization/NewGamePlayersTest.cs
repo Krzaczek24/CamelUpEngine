@@ -25,7 +25,7 @@ namespace TestCamelUpEngine.GameInitialization
         public void TestCurrentPlayerIsSet() => Assert.AreEqual(players.First(), game.Players.First().Name);
 
         [Test]
-        public void TestAllPlayersHaveInitialCoins() => game.Players.ToList().ForEach(player => Assert.AreEqual(IPlayer.INITIAL_COINS_COUNT, player.Coins));
+        public void TestAllPlayersHaveInitialCoins() => game.Players.ToList().ForEach(player => Assert.AreEqual(IPlayer.InitialCoinsCount, player.Coins));
 
         [Test]
         public void TestAllPlayersAreUnique() => CollectionAssert.AllItemsAreUnique(game.Players.Select(player => player.Name));
