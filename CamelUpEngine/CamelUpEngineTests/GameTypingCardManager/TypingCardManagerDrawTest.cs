@@ -2,7 +2,9 @@
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
+using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +12,7 @@ namespace TestCamelUpEngine.GameTypingCardManager
 {
     internal class TypingCardManagerDrawTest
     {
-        private TypingCardManager manager = new();
+        private TypingCardManager manager = new(() => Guid.Empty);
 
         [SetUp]
         public void SetUp()

@@ -17,7 +17,6 @@ namespace CamelUpEngine.GameObjects
     {
         private readonly List<Camel> camels = new();
 
-        public bool PossibleToPutAudienceTile => Index != 1 && !camels.Any() && AudienceTile == null;
         public int Index { get; }
         public IAudienceTile AudienceTile { get; private set; }
         public IReadOnlyCollection<ICamel> Camels => camels;

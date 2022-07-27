@@ -2,18 +2,18 @@
 
 namespace CamelUpEngine.Core.Actions.Steps
 {
-    public interface IAudienceTilePlacementStep : IActionStep
+    public interface IAudienceTileRemovementStep : IActionStep
     {
         public int FieldIndex { get; }
         public IAudienceTile AudienceTile { get; }
     }
 
-    internal class AudienceTilePlacementStep : IAudienceTilePlacementStep
+    internal class AudienceTileRemovementStep : IAudienceTileRemovementStep
     {
         public int FieldIndex { get; }
         public IAudienceTile AudienceTile { get; }
 
-        public AudienceTilePlacementStep(int fieldIndex, IAudienceTile audienceTile)
+        public AudienceTileRemovementStep(int fieldIndex, IAudienceTile audienceTile)
         {
             FieldIndex = fieldIndex;
             AudienceTile = audienceTile;

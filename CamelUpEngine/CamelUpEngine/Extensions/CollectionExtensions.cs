@@ -36,7 +36,7 @@ namespace CamelUpEngine.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static T GetRandom<T>(this IEnumerable<T> source) => source.ElementAt(new Random().Next(source.Count()));
+        public static T GetRandom<T>(this IEnumerable<T> source) => source.Any() ? source.ElementAt(new Random().Next(source.Count())) : default(T);
 
         /// <summary>
         /// Returns elements from a sequence as strings

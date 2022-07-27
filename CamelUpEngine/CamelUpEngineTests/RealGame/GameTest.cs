@@ -2,6 +2,7 @@
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.Helpers;
+using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,11 @@ namespace TestCamelUpEngine.RealGame
 
         private void TestPlacingAudienceTile()
         {
-            game.PlaceAudienceTile(game.Fields.Select(field => field.Index).GetRandom(), Enum.GetValues<AudienceTileSide>().GetRandom());
+            var field = game.AudienceTileAvailableFields.GetRandom();
+            if (field != null)
+            {
+                game.PlaceAudienceTile(game.AudienceTileAvailableFields.GetRandom(), Enum.GetValues<AudienceTileSide>().GetRandom());
+            }
 
             // TODO: TestPlacingAudienceTile
         }

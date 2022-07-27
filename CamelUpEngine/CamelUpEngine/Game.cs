@@ -5,6 +5,7 @@ using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,6 +18,8 @@ namespace CamelUpEngine
         public const int DefaultFieldsCount = 16;
         public const int MaximalDrawnDices = 5;
 
+        private Func<Guid> GenerateGuid { get; }
+        internal Guid AudienceTileAvailableFieldsGuid { get; private set; }
         private Player currentPlayer;
         private readonly List<Player> players;
         private readonly List<Camel> camels;
@@ -29,7 +32,7 @@ namespace CamelUpEngine
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
         public IReadOnlyCollection<ICamel> Camels => camels.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
-        public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => throw new System.NotImplementedException(); // TODO: zaimplementować AudienceTileAvailableFields
+        public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
         public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
@@ -37,8 +40,11 @@ namespace CamelUpEngine
         public bool GameIsOver { get; private set; }
         public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
 
-        public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
+        public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount, Func<Guid> guidGenerationFunction = null)
         {
+            GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;
+            AudienceTileAvailableFieldsGuid = GenerateGuid();
+
             players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();
             camels = GameInitializer.GenerateCamels().ToList();
             fields = GameInitializer.GenerateFields(fieldsCount).ToList();
@@ -95,32 +101,39 @@ namespace CamelUpEngine
             return ActionCollector.GetActions();
         }
 
-        public IActionResult PlaceAudienceTile(int fieldIndex, AudienceTileSide audienceTileSide)
-        { // TODO: przerobić na IAvailableField
+        public IActionResult PlaceAudienceTile(IAvailableField availableField, AudienceTileSide audienceTileSide)
+        {
             if (GameIsOver)
             {
                 throw new GameOverException();
             }
 
-            if (fieldIndex < 1 || fieldIndex > fields.Count)
+            if (AudienceTileAvailableFieldsGuid != availableField.DrawGuid)
             {
-                throw new FieldNotFoundException(fieldIndex);
+                throw new FieldExpiredAvailabilityException();
             }
             
-            Field previousField = fields.SingleOrDefault(field => field.Index == fieldIndex - 1);
-            Field nextField = fields.SingleOrDefault(field => field.Index == fieldIndex + 1);
+            Field previousField = fields.SingleOrDefault(field => field.Index == availableField.Index - 1);
+            Field nextField = fields.SingleOrDefault(field => field.Index == availableField.Index + 1);
             if (previousField?.AudienceTile != null || nextField?.AudienceTile != null)
             {
-                throw new NearbyFieldOccupiedByAudienceTileException(fieldIndex);
+                throw new NearbyFieldOccupiedByAudienceTileException(availableField.Index);
             }
 
-            Field playersAudienceTilePreviousField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == currentPlayer);
-            Field targetField = fields.Single(field => field.Index == fieldIndex);
+            Field previousAudienceTileField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == currentPlayer);
+            Field targetField = fields.Single(field => field.Index == availableField.Index);
             targetField.PutAudienceTile(currentPlayer.GetAudienceTile(audienceTileSide));
-            playersAudienceTilePreviousField?.RemoveAudienceTile();
-            ActionCollector.AddAction(new AudienceTilePlacementStep(targetField));
+
+            if (previousAudienceTileField != null)
+            {
+                ActionCollector.AddAction(new AudienceTileRemovementStep(previousAudienceTileField.Index, previousAudienceTileField.AudienceTile));
+                previousAudienceTileField?.RemoveAudienceTile();
+            }
+            ActionCollector.AddAction(new AudienceTilePlacementStep(targetField.Index, targetField.AudienceTile));
 
             SetNextPlayerAsCurrent();
+
+            AudienceTileAvailableFieldsGuid = GenerateGuid();
 
             return ActionCollector.GetActions();
         }
@@ -156,6 +169,32 @@ namespace CamelUpEngine
             ActionCollector.AddAction(new ChangedCurrentPlayerStep(currentPlayer));
         }
 
+        private List<IAvailableField> GetAudienceTileAvailableFields()
+        {
+            List<IAvailableField> availableFields = new();
+            
+            for (int fieldIndex = 1; fieldIndex < fields.Count; fieldIndex++)
+            {
+                Field currentField = fields[fieldIndex];
+                if (currentField.AudienceTile != null)
+                {
+                    fieldIndex++;
+                    continue;
+                }
+
+                Field previousField = fields[fieldIndex - 1];
+                Field nextField = fields[(fieldIndex + 1) % fields.Count];
+                if (previousField.AudienceTile == null
+                && !currentField.Camels.Any()
+                && nextField.AudienceTile == null)
+                {
+                    availableFields.Add(new AvailableField(currentField.Index, AudienceTileAvailableFieldsGuid));
+                }
+            }
+
+            return availableFields;
+        }
+
         private void MoveCamel(Colour colour, int value)
         {
             bool isMadColour = ColourHelper.IsMadColour(colour);
@@ -174,7 +213,8 @@ namespace CamelUpEngine
                 GameIsOver = true;
                 return;
             }
-            ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex - 1]));
+            ActionCollector.AddAction(new CamelsMovedStep(camels, field.Index, newFieldIndex));
+            field = fields[newFieldIndex - 1];
 
             // additional move if camel ended move on audience tile
             AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
@@ -183,7 +223,14 @@ namespace CamelUpEngine
                 ActionCollector.AddAction(new CamelsStoodOnAudienceTileStep(audienceTile));
                 ((Player)audienceTile.Owner).AddCoins(1);
                 newFieldIndex = field.Index + audienceTile.MoveValue;
-                ActionCollector.AddAction(new CamelsMovedStep(camels, field, field = fields[newFieldIndex - 1], audienceTile.Side.ToStackPutType()));
+                if (isMadColour && newFieldIndex <= 0
+                || !isMadColour && newFieldIndex > fields.Count)
+                {
+                    GameIsOver = true;
+                    return;
+                }
+                ActionCollector.AddAction(new CamelsMovedStep(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
+                field = fields[newFieldIndex - 1];
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
                     field.PutCamels(camels, StackPutType.Bottom);
@@ -195,6 +242,8 @@ namespace CamelUpEngine
             field.PutCamels(camels);
             camels.ForEach(camel => camelPositions[camel.Colour] = field);
         }
+
+        private bool DoesCamelGoThroughFinishLine(int newFieldIndex) => newFieldIndex <= 0 || newFieldIndex > fields.Count;
 
         private bool ShouldSwitchMadColour(Colour colour)
         {

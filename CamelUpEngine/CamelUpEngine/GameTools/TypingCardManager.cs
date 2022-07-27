@@ -2,6 +2,7 @@
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,10 +12,14 @@ namespace CamelUpEngine.GameTools
     {
         private readonly static IReadOnlyCollection<TypingCardValue> initialValues = new[] { TypingCardValue.Low, TypingCardValue.Low, TypingCardValue.Medium, TypingCardValue.High };
         private Dictionary<Colour, Stack<TypingCard>> availableCards = new();
-        public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card) : null).Where(card => card != null).ToList();
+        private Func<Guid> GenerateGuid { get; }
+        internal Guid DrawGuid { get; private set; }
+        public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card, DrawGuid) : null).Where(card => card != null).ToList();
 
-        public TypingCardManager()
+        public TypingCardManager(Func<Guid> guidGenerationFunction = null)
         {
+            GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;
+
             foreach (Colour colour in ColourHelper.AllCardColours)
             {
                 availableCards.Add(colour, new());
@@ -33,17 +38,27 @@ namespace CamelUpEngine.GameTools
                     availableCards[colour].Push(new(colour, value));
                 }
             }
+
+            SetNewGuid();
         }
 
         public ITypingCard DrawCard(IAvailableTypingCard availableTypingCard)
         {
+            if (availableTypingCard.DrawGuid != DrawGuid)
+            {
+                throw new TypingCardExpiredAvailabilityException();
+            }
+
             if (availableCards.TryGetValue(availableTypingCard.Colour, out Stack<TypingCard> stack)
             && stack.TryPop(out TypingCard card))
             {
+                SetNewGuid();
                 return card;
             }
 
             throw new NoTypingCardsAvailableException(availableTypingCard.Colour);
         }
+        
+        private void SetNewGuid() => DrawGuid = GenerateGuid();
     }
 }
