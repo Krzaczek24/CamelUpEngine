@@ -1,6 +1,8 @@
-﻿using CamelUpEngine.Core.Enums;
+﻿using CamelUpEngine.Core.Actions.Events;
+using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
+using CamelUpEngine.GameTools;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -50,7 +52,11 @@ namespace CamelUpEngine.GameObjects
             }
         }
 
-        public void RemoveAudienceTile() => AudienceTile = null;
+        public void RemoveAudienceTile()
+        {
+            ActionEventsCollector.AddEvent(new AudienceTileRemovementEvent(Index, AudienceTile));
+            AudienceTile = null;
+        }
 
         public void PutAudienceTile(AudienceTile audienceTile)
         {
@@ -68,6 +74,7 @@ namespace CamelUpEngine.GameObjects
             }
 
             AudienceTile = audienceTile;
+            ActionEventsCollector.AddEvent(new AudienceTilePlacementEvent(Index, AudienceTile));
         }
 
         public override string ToString() => $"{Index}. field {CamelsDesc()} and {AudienceTileDesc()}";

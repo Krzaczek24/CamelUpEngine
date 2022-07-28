@@ -2,7 +2,6 @@
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.Helpers;
-using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -55,7 +54,7 @@ namespace TestCamelUpEngine.RealGame
 
         private void TestDrawingTypingCard()
         {
-            //game.DrawTypingCard(ColourHelper.AllCamelColours.GetRandom());
+            game.DrawTypingCard(game.AvailableTypingCards.GetRandom());
 
             // TODO: TestDrawingTypingCard
         }

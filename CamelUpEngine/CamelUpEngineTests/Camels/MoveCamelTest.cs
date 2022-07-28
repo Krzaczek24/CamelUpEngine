@@ -1,6 +1,7 @@
-﻿using CamelUpEngine;
-using CamelUpEngine.Core.Actions.Steps;
-using CamelUpEngine.Helpers;
+﻿#if DEBUG
+using CamelUpEngine;
+using CamelUpEngine.Core.Actions.Events;
+using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -25,8 +26,8 @@ namespace TestCamelUpEngine.Camels
             var camelsInitialFieldIndexes = game.CamelPositions;
 
             var drawDiceActionResult = game.DrawDice();
-            var drawnDiceActionStep = drawDiceActionResult.GetActionStep<IDiceDrawnStep>();
-            var drawnDice = drawnDiceActionStep.DrawnDice;
+            var drawnDiceActionEvent = drawDiceActionResult.GetActionEvent<IDiceDrawnEvent>();
+            var drawnDice = drawnDiceActionEvent.DrawnDice;
 
             int fieldIndexShift = drawnDice.Value;
             int camelInitialFieldIndex = camelsInitialFieldIndexes[drawnDice.Colour];
@@ -36,3 +37,4 @@ namespace TestCamelUpEngine.Camels
         }
     }
 }
+#endif

@@ -1,19 +1,19 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.Steps
+namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface ITypingCardDrawnStep : IActionStep
+    public interface ITypingCardDrawnEvent : IActionEvent
     {
         public IPlayer Player { get; }
         public ITypingCard TypingCard { get; }
     }
 
-    internal class TypingCardDrawnStep : ITypingCardDrawnStep
+    internal class TypingCardDrawnEvent : ITypingCardDrawnEvent
     {
         public IPlayer Player { get; }
         public ITypingCard TypingCard { get; }
 
-        public TypingCardDrawnStep(IPlayer player, ITypingCard typingCard)
+        public TypingCardDrawnEvent(IPlayer player, ITypingCard typingCard)
         {
             Player = player;
             TypingCard = typingCard;

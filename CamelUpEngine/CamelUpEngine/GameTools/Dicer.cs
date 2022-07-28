@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core.Actions.Steps;
+﻿using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
@@ -27,7 +27,7 @@ namespace CamelUpEngine.GameTools
             DrawnDice drawnDice = new(dice);
             remainingDices.Remove(dice);
             drawnDices.Add(drawnDice);
-            ActionCollector.AddAction(new DiceDrawnStep(drawnDice));
+            ActionEventsCollector.AddEvent(new DiceDrawnEvent(drawnDice));
             return drawnDice;
         }
 

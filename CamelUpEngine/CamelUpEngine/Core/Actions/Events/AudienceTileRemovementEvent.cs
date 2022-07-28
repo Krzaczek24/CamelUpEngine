@@ -1,19 +1,19 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.Steps
+namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface IAudienceTilePlacementStep : IActionStep
+    public interface IAudienceTileRemovementEvent : IActionEvent
     {
         public int FieldIndex { get; }
         public IAudienceTile AudienceTile { get; }
     }
 
-    internal class AudienceTilePlacementStep : IAudienceTilePlacementStep
+    internal class AudienceTileRemovementEvent : IAudienceTileRemovementEvent
     {
         public int FieldIndex { get; }
         public IAudienceTile AudienceTile { get; }
 
-        public AudienceTilePlacementStep(int fieldIndex, IAudienceTile audienceTile)
+        public AudienceTileRemovementEvent(int fieldIndex, IAudienceTile audienceTile)
         {
             FieldIndex = fieldIndex;
             AudienceTile = audienceTile;

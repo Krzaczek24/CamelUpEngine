@@ -1,17 +1,17 @@
 ﻿using CamelUpEngine.GameObjects;
 
-namespace CamelUpEngine.Core.Actions.Steps
+namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface IDiceDrawnStep : IActionStep
+    public interface IDiceDrawnEvent : IActionEvent
     {
         public IDrawnDice DrawnDice { get; }
     }
 
-    internal class DiceDrawnStep : IDiceDrawnStep
+    internal class DiceDrawnEvent : IDiceDrawnEvent
     {
         public IDrawnDice DrawnDice { get; }
 
-        public DiceDrawnStep(IDrawnDice drawnDice)
+        public DiceDrawnEvent(IDrawnDice drawnDice)
         {
             DrawnDice = drawnDice;
         }

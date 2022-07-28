@@ -11,10 +11,13 @@ namespace CamelUpEngine.GameTools
     public class TypingCardManager
     {
         private readonly static IReadOnlyCollection<TypingCardValue> initialValues = new[] { TypingCardValue.Low, TypingCardValue.Low, TypingCardValue.Medium, TypingCardValue.High };
+
         private Dictionary<Colour, Stack<TypingCard>> availableCards = new();
         private Func<Guid> GenerateGuid { get; }
         internal Guid DrawGuid { get; private set; }
-        public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card, DrawGuid) : null).Where(card => card != null).ToList();
+
+        private IReadOnlyCollection<IAvailableTypingCard> availableCardsCache;
+        public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCardsCache ??= availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card, DrawGuid) : null).Where(card => card != null).ToList();
 
         public TypingCardManager(Func<Guid> guidGenerationFunction = null)
         {
@@ -39,6 +42,7 @@ namespace CamelUpEngine.GameTools
                 }
             }
 
+            availableCardsCache = null;
             SetNewGuid();
         }
 
@@ -52,6 +56,7 @@ namespace CamelUpEngine.GameTools
             if (availableCards.TryGetValue(availableTypingCard.Colour, out Stack<TypingCard> stack)
             && stack.TryPop(out TypingCard card))
             {
+                availableCardsCache = null;
                 SetNewGuid();
                 return card;
             }

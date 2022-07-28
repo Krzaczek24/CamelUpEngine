@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CamelUpEngine.Core.Actions.Steps
+namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface IGameOverStep : IActionStep
+    public interface IGameOverEvent : IActionEvent
     {
         public IReadOnlyCollection<IPlayer> Winners { get; }
     }
 
-    internal class GameOverStep : IGameOverStep
+    internal class GameOverEvent : IGameOverEvent
     {
         public IReadOnlyCollection<IPlayer> Winners { get; }
 
-        public GameOverStep(Game game)
+        public GameOverEvent(Game game)
         {
             Winners = game.Players.OrderByDescending(player => player.Coins).ToList();
         }

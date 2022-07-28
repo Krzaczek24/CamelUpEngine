@@ -1,5 +1,5 @@
 ﻿using CamelUpEngine.Core.Actions;
-using CamelUpEngine.Core.Actions.Steps;
+using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
@@ -36,6 +36,7 @@ namespace CamelUpEngine
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
         public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
+        public IReadOnlyCollection<ICamel> CamelsOrder => fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
 
         public bool GameIsOver { get; private set; }
         public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
@@ -52,7 +53,7 @@ namespace CamelUpEngine
             currentPlayer = players.First();
         }
 
-        public IActionResult DrawDice()
+        public ActionEvents DrawDice()
         {
             if (GameIsOver)
             {
@@ -75,10 +76,10 @@ namespace CamelUpEngine
 
             SetNextPlayerAsCurrent();
 
-            return ActionCollector.GetActions();
+            return ActionEventsCollector.GetEvents();
         }
 
-        public IActionResult MakeBet(Colour colour, BetType betType)
+        public ActionEvents MakeBet(Colour colour, BetType betType)
         {
             if (GameIsOver)
             {
@@ -90,18 +91,18 @@ namespace CamelUpEngine
 
             SetNextPlayerAsCurrent();
 
-            return ActionCollector.GetActions();
+            return ActionEventsCollector.GetEvents();
         }
 
-        public IActionResult DrawTypingCard(IAvailableTypingCard card)
+        public ActionEvents DrawTypingCard(IAvailableTypingCard card)
         {
-            ITypingCard typingCard = cardManager.DrawCard(card);
+            TypingCard typingCard = (TypingCard)cardManager.DrawCard(card);
             currentPlayer.AddTypingCard(typingCard);
-
-            return ActionCollector.GetActions();
+            ActionEventsCollector.AddEvent(new TypingCardDrawnEvent(currentPlayer, typingCard));
+            return ActionEventsCollector.GetEvents();
         }
 
-        public IActionResult PlaceAudienceTile(IAvailableField availableField, AudienceTileSide audienceTileSide)
+        public ActionEvents PlaceAudienceTile(IAvailableField availableField, AudienceTileSide audienceTileSide)
         {
             if (GameIsOver)
             {
@@ -123,25 +124,19 @@ namespace CamelUpEngine
             Field previousAudienceTileField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == currentPlayer);
             Field targetField = fields.Single(field => field.Index == availableField.Index);
             targetField.PutAudienceTile(currentPlayer.GetAudienceTile(audienceTileSide));
-
-            if (previousAudienceTileField != null)
-            {
-                ActionCollector.AddAction(new AudienceTileRemovementStep(previousAudienceTileField.Index, previousAudienceTileField.AudienceTile));
-                previousAudienceTileField?.RemoveAudienceTile();
-            }
-            ActionCollector.AddAction(new AudienceTilePlacementStep(targetField.Index, targetField.AudienceTile));
+            previousAudienceTileField?.RemoveAudienceTile();
 
             SetNextPlayerAsCurrent();
 
             AudienceTileAvailableFieldsGuid = GenerateGuid();
 
-            return ActionCollector.GetActions();
+            return ActionEventsCollector.GetEvents();
         }
 
         private void FinishGame()
         {
             SummarizeCurrentTurn();
-            ActionCollector.AddAction(new GameOverStep(this));
+            ActionEventsCollector.AddEvent(new GameOverEvent(this));
         }
 
         private void GoToNextTurn()
@@ -149,15 +144,39 @@ namespace CamelUpEngine
             RemoveAllAudienceTiles();
             dicer.Reset();
             SummarizeCurrentTurn();
-            ActionCollector.AddAction(new NewTurnStep());
+            ActionEventsCollector.AddEvent(new NewTurnEvent());
         }
 
+        //TODO: otestować
         private void SummarizeCurrentTurn()
         {
-            // TODO: podsumowanie tury
+            List<IPlayerTypingCardsReturnedEvent> playerTypingCardsReturnedEvents = new();
+            var camelsOrder = CamelsOrder.GetColours().ToList();
+
+            foreach (Player player in players)
+            {
+                int playerCoinsEarned = 0;
+                foreach (ITypingCard typingCard in player.TypingCards)
+                {
+                    int rank = camelsOrder.IndexOf(typingCard.Colour);
+                    switch (rank)
+                    {
+                        case 1: playerCoinsEarned += (int)typingCard.Value; break;
+                        case 2: playerCoinsEarned++; break;
+                        default: playerCoinsEarned--; break;
+                    }
+                }
+                PlayerTypingCardsReturnedEvent actionEvent = new(player, player.ReturnTypingCards());
+                playerTypingCardsReturnedEvents.Add(actionEvent);
+                ActionEventsCollector.AddEvent(actionEvent);
+                ActionEventsCollector.AddEvent(new CoinsAddedEvent(player, player.AddCoins(playerCoinsEarned)));
+            }
+
+            cardManager.Reset();
+            ActionEventsCollector.AddEvent(new AllTypingCardsReturnedEvent(playerTypingCardsReturnedEvents));
         }
 
-        private void GiveCurrentPlayerACoin() => currentPlayer.AddCoins(Dicer.DiceDrawReward);
+        private void GiveCurrentPlayerACoin() => ActionEventsCollector.AddEvent(new CoinsAddedEvent(currentPlayer, currentPlayer.AddCoins(Dicer.DiceDrawReward)));
 
         private void RemoveAllAudienceTiles() => fields.ForEach(field => field.RemoveAudienceTile());
 
@@ -166,7 +185,7 @@ namespace CamelUpEngine
             int currentIndex = players.ToList().IndexOf(currentPlayer);
             int playersCount = players.Count;
             currentPlayer = players.ElementAt(++currentIndex % playersCount);
-            ActionCollector.AddAction(new ChangedCurrentPlayerStep(currentPlayer));
+            ActionEventsCollector.AddEvent(new ChangedCurrentPlayerEvent(currentPlayer));
         }
 
         private List<IAvailableField> GetAudienceTileAvailableFields()
@@ -207,29 +226,29 @@ namespace CamelUpEngine
             Field field = camelPositions[colour];
             List<Camel> camels = field.TakeOffCamel(colour);
             int newFieldIndex = field.Index + value;
-            if (isMadColour && newFieldIndex <= 0 
-            || !isMadColour && newFieldIndex > fields.Count)
+            if (DoesCamelGoThroughFinishLine(newFieldIndex))
             {
+                PerformEndingCamelMove(newFieldIndex);
                 GameIsOver = true;
                 return;
             }
-            ActionCollector.AddAction(new CamelsMovedStep(camels, field.Index, newFieldIndex));
+            ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex));
             field = fields[newFieldIndex - 1];
 
             // additional move if camel ended move on audience tile
             AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
             if (audienceTile != null)
             {
-                ActionCollector.AddAction(new CamelsStoodOnAudienceTileStep(audienceTile));
-                ((Player)audienceTile.Owner).AddCoins(1);
+                ActionEventsCollector.AddEvent(new CamelsStoodOnAudienceTileEvent(audienceTile));
+                GiveCurrentPlayerACoin();
                 newFieldIndex = field.Index + audienceTile.MoveValue;
-                if (isMadColour && newFieldIndex <= 0
-                || !isMadColour && newFieldIndex > fields.Count)
+                if (DoesCamelGoThroughFinishLine(newFieldIndex))
                 {
+                    PerformEndingCamelMove(newFieldIndex);
                     GameIsOver = true;
                     return;
                 }
-                ActionCollector.AddAction(new CamelsMovedStep(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
+                ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
                 field = fields[newFieldIndex - 1];
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
@@ -243,19 +262,33 @@ namespace CamelUpEngine
             camels.ForEach(camel => camelPositions[camel.Colour] = field);
         }
 
+        private void PerformEndingCamelMove(int newFieldIndex)
+        {
+            Field field;
+            if (newFieldIndex <= 0)
+            {
+                (field = fields.First()).PutCamels(camels, StackPutType.Bottom);                
+            }
+            else
+            {
+                (field = fields.Last()).PutCamels(camels);
+            }
+            camels.ForEach(camel => camelPositions[camel.Colour] = field);
+        }
+
         private bool DoesCamelGoThroughFinishLine(int newFieldIndex) => newFieldIndex <= 0 || newFieldIndex > fields.Count;
 
         private bool ShouldSwitchMadColour(Colour colour)
         {
             if (AreMadCamelsOnTheSameField() && IsNearestCamelOnBackMad(colour))
             {
-                ActionCollector.AddAction(new MadCamelColourSwitchedStep(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne));
+                ActionEventsCollector.AddEvent(new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne));
                 return true;
             }
 
             if (!AnyNotMadCamelsOnBack(colour) && AnyNotMadCamelsOnBack(ColourHelper.GetOppositeMadColour(colour)))
             {
-                ActionCollector.AddAction(new MadCamelColourSwitchedStep(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels));
+                ActionEventsCollector.AddEvent(new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels));
                 return true;
             }
 
