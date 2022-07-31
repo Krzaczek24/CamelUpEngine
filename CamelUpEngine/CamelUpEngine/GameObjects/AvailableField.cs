@@ -18,5 +18,7 @@ namespace CamelUpEngine.GameObjects
             Index = index;
             DrawGuid = drawGuid;
         }
+
+        public override string ToString() => $"{Index}. field";
     }
 }

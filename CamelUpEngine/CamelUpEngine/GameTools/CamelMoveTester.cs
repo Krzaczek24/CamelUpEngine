@@ -1,5 +1,4 @@
 ﻿#if DEBUG
-
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using System.Collections.Generic;
@@ -9,16 +8,6 @@ namespace CamelUpEngine.GameTools
 {
     public class CamelMoveTester
     {
-        public static IReadOnlyCollection<ICamel> Camels { get; } = new Camel[]
-        {
-            new Camel(Colour.Red),
-            new Camel(Colour.Green),
-            new Camel(Colour.Black),
-            new Camel(Colour.Blue),
-            new Camel(Colour.Yellow),
-            new Camel(Colour.White),
-        };
-
         private Field field = new Field(0);
 
         public IReadOnlyCollection<ICamel> FieldCamels => field.Camels;
@@ -36,5 +25,4 @@ namespace CamelUpEngine.GameTools
         private List<Camel> Convert(List<ICamel> camels) => camels.Cast<Camel>().ToList();
     }
 }
-
 #endif

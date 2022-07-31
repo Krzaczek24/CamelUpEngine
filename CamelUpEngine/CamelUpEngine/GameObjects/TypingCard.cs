@@ -3,10 +3,7 @@ using CamelUpEngine.GameObjects.Core;
 
 namespace CamelUpEngine.GameObjects
 {
-    public interface ITypingCard : IColourable
-    {
-        public TypingCardValue Value { get; }
-    }
+    public interface ITypingCard : IColourable, IValuable { }
 
     internal sealed class TypingCard : TypingCardBase, ITypingCard
     {

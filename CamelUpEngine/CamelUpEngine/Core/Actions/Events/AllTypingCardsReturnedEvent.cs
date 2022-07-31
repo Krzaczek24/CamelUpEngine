@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface IAllTypingCardsReturnedEvent : IActionEvent
-    {
-        public IReadOnlyCollection<IPlayerTypingCardsReturnedEvent> PlayerSubEvents { get; }
-    }
+    public interface IAllTypingCardsReturnedEvent : IActionEvent, ISubEvents<IPlayerTypingCardsReturnedEvent> { }
 
     internal class AllTypingCardsReturnedEvent : IAllTypingCardsReturnedEvent
     {
-        public IReadOnlyCollection<IPlayerTypingCardsReturnedEvent> PlayerSubEvents { get; }
+        public IReadOnlyCollection<IPlayerTypingCardsReturnedEvent> SubEvents { get; }
 
-        public AllTypingCardsReturnedEvent(IReadOnlyCollection<IPlayerTypingCardsReturnedEvent> playerSubEvents)
+        public AllTypingCardsReturnedEvent(IEnumerable<IPlayerTypingCardsReturnedEvent> subEvents)
         {
-            PlayerSubEvents = playerSubEvents;
+            SubEvents = subEvents.ToList();
         }
     }
 }

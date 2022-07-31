@@ -2,9 +2,18 @@
 
 namespace CamelUpEngine.Exceptions
 {
-    public class NoTypingCardsAvailableException : ColourException
+    public class TypingCardUnavailableException : ColourException
     {
-        public NoTypingCardsAvailableException(Colour colour) : base(colour, $"No more {colour.ToString().ToLower()} typing cards are available") { }
-        public NoTypingCardsAvailableException(Colour colour, string message) : base(colour, message) { }
+        public TypingCardValue Value { get; }
+
+        public TypingCardUnavailableException(Colour colour, TypingCardValue value) : base(colour, $"No more {colour.ToString().ToLower()} typing cards are available")
+        {
+            Value = value;
+        }
+
+        public TypingCardUnavailableException(Colour colour, TypingCardValue value, string message) : base(colour, message)
+        {
+            Value = value;
+        }
     }
 }

@@ -8,11 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestCamelUpEngine.GameTypingCardManager
+namespace TestCamelUpEngine.GameTypingCardsManager
 {
-    internal class TypingCardManagerDrawTest
+    internal class TypingCardsManagerDrawTest
     {
-        private TypingCardManager manager = new(() => Guid.Empty);
+        private TypingCardsManager manager = new(() => Guid.Empty);
 
         [SetUp]
         public void SetUp()

@@ -2,7 +2,7 @@
 
 namespace CamelUpEngine.GameObjects.Core
 {
-    internal abstract class TypingCardBase : IColourable
+    internal abstract class TypingCardBase : IColourable, IValuable
     {
         public Colour Colour { get; }
         public TypingCardValue Value { get; }

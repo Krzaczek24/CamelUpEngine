@@ -6,4 +6,9 @@
         Medium = 3,
         High = 5
     }
+
+    public interface IValuable
+    {
+        public TypingCardValue Value { get; }
+    }
 }

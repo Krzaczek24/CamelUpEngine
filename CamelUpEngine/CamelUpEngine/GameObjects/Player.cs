@@ -37,14 +37,12 @@ namespace CamelUpEngine.GameObjects
 
         public void AddTypingCard(TypingCard typingCard) => typingCards.Add(typingCard);
 
-        public List<TypingCard> ReturnTypingCards()
+        public IReadOnlyCollection<TypingCard> ReturnTypingCards()
         {
             var typingCardsCopy = typingCards.ToList();
             typingCards.Clear();
             return typingCardsCopy;
         }
-
-        public AudienceTile GetAudienceTile(AudienceTileSide audienceTileSide) => new(this, audienceTileSide);
 
         public override string ToString() => $"Player '{Name}'";
     }

@@ -4,9 +4,8 @@ using System;
 
 namespace CamelUpEngine.GameObjects
 {
-    public interface IAvailableTypingCard : IColourable
+    public interface IAvailableTypingCard : IColourable, IValuable
     {
-        public TypingCardValue Value { get; }
         internal Guid DrawGuid { get; }
     }
 

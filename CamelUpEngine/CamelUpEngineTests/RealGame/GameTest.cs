@@ -1,7 +1,10 @@
 ﻿using CamelUpEngine;
+using CamelUpEngine.Core.Actions;
+using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.Helpers;
+using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,8 +14,7 @@ namespace TestCamelUpEngine.RealGame
 {
     internal class GameTest
     {
-        private static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
-        private IReadOnlyCollection<Action> actions;
+        private IReadOnlyCollection<Func<ActionEvents>> actions;
         private Game game;
 
         [OneTimeSetUp]
@@ -26,15 +28,11 @@ namespace TestCamelUpEngine.RealGame
             }.ToList();
         }
 
-        [SetUp]
-        public void SetUp()
+        [Test, Repeat(1000)]
+        public void TestManyRandomGames()
         {
-            game = new(players);
-        }
+            game = new(new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" });
 
-        [Test, Repeat(100)]
-        public void TestGame()
-        {
             Assert.DoesNotThrow(() =>
             {
                 while (!game.GameIsOver)
@@ -45,36 +43,65 @@ namespace TestCamelUpEngine.RealGame
             Assert.IsTrue(game.GameIsOver);
         }
 
-        private void TestDrawingDice()
+        private ActionEvents TestDrawingDice()
         {
-            game.DrawDice();
+            ActionEvents events = game.DrawDice();
 
-            // TODO: TestDrawingDice
+            CollectionAssert.AllItemsAreNotNull(events);
+            CollectionAssert.AllItemsAreUnique(events);
+            Assert.That(events, Has.One.AssignableTo<IDiceDrawnEvent>());
+            Assert.That(events.GetActionEvents<ICoinsAddedEvent>().Count(), Is.GreaterThanOrEqualTo(1).And.LessThanOrEqualTo(2), nameof(ICoinsAddedEvent));
+            Assert.That(events.GetActionEvents<ICamelMovedEvent>().Count(), Is.GreaterThanOrEqualTo(1).And.LessThanOrEqualTo(2), nameof(ICamelMovedEvent));
+            //TODO: obczaić resztę przypadków - jeśli koniec gry - jesli koniec tury - itd.
+            Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            return events;
         }
 
-        private void TestDrawingTypingCard()
+        private ActionEvents TestDrawingTypingCard()
         {
-            game.DrawTypingCard(game.AvailableTypingCards.GetRandom());
+            var card = game.AvailableTypingCards.GetRandom();
+            if (card == null)
+            {
+                return null;
+            }
 
             // TODO: TestDrawingTypingCard
+            ActionEvents events = game.DrawTypingCard(card);
+            CollectionAssert.AllItemsAreNotNull(events);
+            CollectionAssert.AllItemsAreUnique(events);
+            Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            return events;
         }
 
-        private void TestPlacingAudienceTile()
+        private ActionEvents TestPlacingAudienceTile()
         {
             var field = game.AudienceTileAvailableFields.GetRandom();
-            if (field != null)
+            if (field == null)
             {
-                game.PlaceAudienceTile(game.AudienceTileAvailableFields.GetRandom(), Enum.GetValues<AudienceTileSide>().GetRandom());
+                return null;
             }
 
             // TODO: TestPlacingAudienceTile
+            ActionEvents events = game.PlaceAudienceTile(field, Enum.GetValues<AudienceTileSide>().GetRandom());
+            CollectionAssert.AllItemsAreNotNull(events);
+            CollectionAssert.AllItemsAreUnique(events);
+            Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            return events;
         }
 
-        private void TestMakingBet()
+        private ActionEvents TestMakingBet()
         {
-            game.MakeBet(ColourHelper.AllCamelColours.GetRandom(), Enum.GetValues<BetType>().GetRandom());
+            ActionEvents events = game.MakeBet(ColourHelper.AllCamelColours.GetRandom(), Enum.GetValues<BetType>().GetRandom());
 
             // TODO: TestMakingBet
+            CollectionAssert.AllItemsAreNotNull(events);
+            CollectionAssert.AllItemsAreUnique(events);
+            Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            return events;
         }
     }
 }

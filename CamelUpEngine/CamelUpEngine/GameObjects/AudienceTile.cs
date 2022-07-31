@@ -14,7 +14,7 @@ namespace CamelUpEngine.GameObjects
         public AudienceTileSide Side { get; }
         public int MoveValue => (int)Side;
 
-        public AudienceTile(Player owner, AudienceTileSide side)
+        public AudienceTile(IPlayer owner, AudienceTileSide side)
         {
             Owner = owner;
             Side = side;

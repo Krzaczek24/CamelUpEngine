@@ -18,22 +18,22 @@ namespace CamelUpEngine
         public const int DefaultFieldsCount = 16;
         public const int MaximalDrawnDices = 5;
 
-        private Func<Guid> GenerateGuid { get; }
-        internal Guid AudienceTileAvailableFieldsGuid { get; private set; }
         private Player currentPlayer;
         private readonly List<Player> players;
         private readonly List<Camel> camels;
         private readonly List<Field> fields;
         private readonly Dictionary<Colour, Field> camelPositions;
-        private readonly Dicer dicer = new();
-        private readonly TypingCardManager cardManager = new();
+        private readonly Dicer dicer;
+        private readonly TypingCardsManager cardManager;
+        private readonly AudienceTilesManager tilesManager;
 
+        public ActionEvents History => ActionEventsCollector.GetGameEvents();
         public IPlayer CurrentPlayer => currentPlayer;
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
         public IReadOnlyCollection<ICamel> Camels => camels.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
-        public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
+        public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
         public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
         public IReadOnlyCollection<ICamel> CamelsOrder => fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
@@ -41,15 +41,16 @@ namespace CamelUpEngine
         public bool GameIsOver { get; private set; }
         public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
 
-        public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount, Func<Guid> guidGenerationFunction = null)
+        public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
         {
-            GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;
-            AudienceTileAvailableFieldsGuid = GenerateGuid();
-
+            ActionEventsCollector.Reset();
             players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();
             camels = GameInitializer.GenerateCamels().ToList();
             fields = GameInitializer.GenerateFields(fieldsCount).ToList();
             camelPositions = GameInitializer.SetCamelsOnBoard(this);
+            dicer = new();
+            cardManager = new();
+            tilesManager = new(fields);
             currentPlayer = players.First();
         }
 
@@ -60,9 +61,11 @@ namespace CamelUpEngine
                 throw new GameOverException();
             }
 
-            IDrawnDice dice = dicer.DrawDice();
-            GiveCurrentPlayerACoin();
-            MoveCamel(dice.Colour, dice.Value);
+            IDrawnDice drawnDice = dicer.DrawDice();
+            ActionEventsCollector.AddEvent(new DiceDrawnEvent(drawnDice));
+            ActionEventsCollector.AddEvent(new CoinsAddedEvent(currentPlayer, currentPlayer.AddCoins(1)));
+
+            MoveCamel(drawnDice.Colour, drawnDice.Value);
 
             if (GameIsOver)
             {
@@ -76,7 +79,7 @@ namespace CamelUpEngine
 
             SetNextPlayerAsCurrent();
 
-            return ActionEventsCollector.GetEvents();
+            return ActionEventsCollector.GetActionEvents();
         }
 
         public ActionEvents MakeBet(Colour colour, BetType betType)
@@ -91,7 +94,7 @@ namespace CamelUpEngine
 
             SetNextPlayerAsCurrent();
 
-            return ActionEventsCollector.GetEvents();
+            return ActionEventsCollector.GetActionEvents();
         }
 
         public ActionEvents DrawTypingCard(IAvailableTypingCard card)
@@ -99,7 +102,10 @@ namespace CamelUpEngine
             TypingCard typingCard = (TypingCard)cardManager.DrawCard(card);
             currentPlayer.AddTypingCard(typingCard);
             ActionEventsCollector.AddEvent(new TypingCardDrawnEvent(currentPlayer, typingCard));
-            return ActionEventsCollector.GetEvents();
+
+            SetNextPlayerAsCurrent();
+
+            return ActionEventsCollector.GetActionEvents();
         }
 
         public ActionEvents PlaceAudienceTile(IAvailableField availableField, AudienceTileSide audienceTileSide)
@@ -109,76 +115,66 @@ namespace CamelUpEngine
                 throw new GameOverException();
             }
 
-            if (AudienceTileAvailableFieldsGuid != availableField.DrawGuid)
+            var placementAudienceTileEvent = tilesManager.PlaceAudienceTile(currentPlayer, availableField, audienceTileSide, out var removementAudienceTileEvent);
+            if (removementAudienceTileEvent != null)
             {
-                throw new FieldExpiredAvailabilityException();
+                ActionEventsCollector.AddEvent(removementAudienceTileEvent);
             }
-            
-            Field previousField = fields.SingleOrDefault(field => field.Index == availableField.Index - 1);
-            Field nextField = fields.SingleOrDefault(field => field.Index == availableField.Index + 1);
-            if (previousField?.AudienceTile != null || nextField?.AudienceTile != null)
-            {
-                throw new NearbyFieldOccupiedByAudienceTileException(availableField.Index);
-            }
-
-            Field previousAudienceTileField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == currentPlayer);
-            Field targetField = fields.Single(field => field.Index == availableField.Index);
-            targetField.PutAudienceTile(currentPlayer.GetAudienceTile(audienceTileSide));
-            previousAudienceTileField?.RemoveAudienceTile();
+            ActionEventsCollector.AddEvent(placementAudienceTileEvent);
 
             SetNextPlayerAsCurrent();
 
-            AudienceTileAvailableFieldsGuid = GenerateGuid();
-
-            return ActionEventsCollector.GetEvents();
+            return ActionEventsCollector.GetActionEvents();
         }
 
         private void FinishGame()
         {
-            SummarizeCurrentTurn();
             ActionEventsCollector.AddEvent(new GameOverEvent(this));
+            SummarizeCurrentTurn();
         }
 
         private void GoToNextTurn()
         {
+            ActionEventsCollector.AddEvent(new EndOfTurnEvent());
             RemoveAllAudienceTiles();
             dicer.Reset();
             SummarizeCurrentTurn();
             ActionEventsCollector.AddEvent(new NewTurnEvent());
         }
 
-        //TODO: otestować
         private void SummarizeCurrentTurn()
         {
+            List<ICoinsAddedEvent> playerCoinsEarnedEvents = new();
             List<IPlayerTypingCardsReturnedEvent> playerTypingCardsReturnedEvents = new();
-            var camelsOrder = CamelsOrder.GetColours().ToList();
 
             foreach (Player player in players)
             {
-                int playerCoinsEarned = 0;
-                foreach (ITypingCard typingCard in player.TypingCards)
+                IReadOnlyCollection<ITypingCard> returnedTypingCard = player.ReturnTypingCards();
+                if (returnedTypingCard.Any())
                 {
-                    int rank = camelsOrder.IndexOf(typingCard.Colour);
-                    switch (rank)
+                    playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
+                    int earnedCoins = TypingCardsManager.CountCoins(CamelsOrder, player.TypingCards);
+                    if (earnedCoins != 0)
                     {
-                        case 1: playerCoinsEarned += (int)typingCard.Value; break;
-                        case 2: playerCoinsEarned++; break;
-                        default: playerCoinsEarned--; break;
+                        playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
                     }
                 }
-                PlayerTypingCardsReturnedEvent actionEvent = new(player, player.ReturnTypingCards());
-                playerTypingCardsReturnedEvents.Add(actionEvent);
-                ActionEventsCollector.AddEvent(actionEvent);
-                ActionEventsCollector.AddEvent(new CoinsAddedEvent(player, player.AddCoins(playerCoinsEarned)));
             }
+            ActionEventsCollector.AddEvent(new CoinsCountingEvent(playerCoinsEarnedEvents));
 
             cardManager.Reset();
             ActionEventsCollector.AddEvent(new AllTypingCardsReturnedEvent(playerTypingCardsReturnedEvents));
         }
 
-        private void GiveCurrentPlayerACoin() => ActionEventsCollector.AddEvent(new CoinsAddedEvent(currentPlayer, currentPlayer.AddCoins(Dicer.DiceDrawReward)));
-
-        private void RemoveAllAudienceTiles() => fields.ForEach(field => field.RemoveAudienceTile());
+        private void RemoveAllAudienceTiles()
+        {
+            var fieldsWithAudienceTile = fields.Where(field => field.AudienceTile != null);
+            foreach (Field field in fieldsWithAudienceTile)
+            {
+                field.RemoveAudienceTile();
+                ActionEventsCollector.AddEvent(new AudienceTileRemovementEvent(field.Index, field.AudienceTile));
+            }
+        }
 
         private void SetNextPlayerAsCurrent()
         {
@@ -186,32 +182,6 @@ namespace CamelUpEngine
             int playersCount = players.Count;
             currentPlayer = players.ElementAt(++currentIndex % playersCount);
             ActionEventsCollector.AddEvent(new ChangedCurrentPlayerEvent(currentPlayer));
-        }
-
-        private List<IAvailableField> GetAudienceTileAvailableFields()
-        {
-            List<IAvailableField> availableFields = new();
-            
-            for (int fieldIndex = 1; fieldIndex < fields.Count; fieldIndex++)
-            {
-                Field currentField = fields[fieldIndex];
-                if (currentField.AudienceTile != null)
-                {
-                    fieldIndex++;
-                    continue;
-                }
-
-                Field previousField = fields[fieldIndex - 1];
-                Field nextField = fields[(fieldIndex + 1) % fields.Count];
-                if (previousField.AudienceTile == null
-                && !currentField.Camels.Any()
-                && nextField.AudienceTile == null)
-                {
-                    availableFields.Add(new AvailableField(currentField.Index, AudienceTileAvailableFieldsGuid));
-                }
-            }
-
-            return availableFields;
         }
 
         private void MoveCamel(Colour colour, int value)
@@ -226,13 +196,13 @@ namespace CamelUpEngine
             Field field = camelPositions[colour];
             List<Camel> camels = field.TakeOffCamel(colour);
             int newFieldIndex = field.Index + value;
+            ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex));
             if (DoesCamelGoThroughFinishLine(newFieldIndex))
             {
                 PerformEndingCamelMove(newFieldIndex);
                 GameIsOver = true;
                 return;
             }
-            ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex));
             field = fields[newFieldIndex - 1];
 
             // additional move if camel ended move on audience tile
@@ -240,15 +210,15 @@ namespace CamelUpEngine
             if (audienceTile != null)
             {
                 ActionEventsCollector.AddEvent(new CamelsStoodOnAudienceTileEvent(audienceTile));
-                GiveCurrentPlayerACoin();
+                ActionEventsCollector.AddEvent(new CoinsAddedEvent(audienceTile.Owner, ((Player)audienceTile.Owner).AddCoins(1)));
                 newFieldIndex = field.Index + audienceTile.MoveValue;
+                ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
                 if (DoesCamelGoThroughFinishLine(newFieldIndex))
                 {
                     PerformEndingCamelMove(newFieldIndex);
                     GameIsOver = true;
                     return;
                 }
-                ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
                 field = fields[newFieldIndex - 1];
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {

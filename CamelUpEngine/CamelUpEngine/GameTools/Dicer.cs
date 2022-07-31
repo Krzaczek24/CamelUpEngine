@@ -10,8 +10,6 @@ namespace CamelUpEngine.GameTools
 {
     public class Dicer
     {
-        public const int DiceDrawReward = 1;
-
         private readonly List<Dice> remainingDices = new();
         private readonly List<DrawnDice> drawnDices = new();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => drawnDices.ToList();
@@ -27,7 +25,6 @@ namespace CamelUpEngine.GameTools
             DrawnDice drawnDice = new(dice);
             remainingDices.Remove(dice);
             drawnDices.Add(drawnDice);
-            ActionEventsCollector.AddEvent(new DiceDrawnEvent(drawnDice));
             return drawnDice;
         }
 

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace CamelUpEngine.GameTools
 {
-    public class TypingCardManager
+    public class TypingCardsManager
     {
         private readonly static IReadOnlyCollection<TypingCardValue> initialValues = new[] { TypingCardValue.Low, TypingCardValue.Low, TypingCardValue.Medium, TypingCardValue.High };
 
@@ -19,7 +19,7 @@ namespace CamelUpEngine.GameTools
         private IReadOnlyCollection<IAvailableTypingCard> availableCardsCache;
         public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCardsCache ??= availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card, DrawGuid) : null).Where(card => card != null).ToList();
 
-        public TypingCardManager(Func<Guid> guidGenerationFunction = null)
+        public TypingCardsManager(Func<Guid> guidGenerationFunction = null)
         {
             GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;
 
@@ -43,7 +43,7 @@ namespace CamelUpEngine.GameTools
             }
 
             availableCardsCache = null;
-            SetNewGuid();
+            DrawGuid = GenerateGuid();
         }
 
         public ITypingCard DrawCard(IAvailableTypingCard availableTypingCard)
@@ -54,16 +54,34 @@ namespace CamelUpEngine.GameTools
             }
 
             if (availableCards.TryGetValue(availableTypingCard.Colour, out Stack<TypingCard> stack)
-            && stack.TryPop(out TypingCard card))
+            && stack.TryPeek(out TypingCard card)
+            && card.Value == availableTypingCard.Value)
             {
                 availableCardsCache = null;
-                SetNewGuid();
-                return card;
+                DrawGuid = GenerateGuid();
+                return stack.Pop();
             }
 
-            throw new NoTypingCardsAvailableException(availableTypingCard.Colour);
+            throw new TypingCardUnavailableException(availableTypingCard.Colour, availableTypingCard.Value);
         }
-        
-        private void SetNewGuid() => DrawGuid = GenerateGuid();
+
+        public static int CountCoins(IEnumerable<ICamel> camelsOrder, IEnumerable<ITypingCard> cards)
+        {
+            int playerCoinsEarned = 0;
+            var camelsColourOrder = camelsOrder.Where(camel => !camel.IsMad).GetColours().ToList();
+            
+            foreach (ITypingCard card in cards)
+            {
+                int rank = camelsColourOrder.IndexOf(card.Colour) + 1;
+                switch (rank)
+                {
+                    case 1: playerCoinsEarned += (int)card.Value; break;
+                    case 2: playerCoinsEarned++; break;
+                    default: playerCoinsEarned--; break;
+                }
+            }
+
+            return playerCoinsEarned;
+        }
     }
 }
