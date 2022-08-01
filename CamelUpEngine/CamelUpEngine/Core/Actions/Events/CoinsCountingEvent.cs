@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface ICoinsCountingEvent : IActionEvent, ISubEvents<ICoinsAddedEvent> { }
-
-    internal class CoinsCountingEvent : ICoinsCountingEvent
+    public interface ICoinsCountingEvent : IActionSubEvents<ICoinsAddedEvent>, IActionEvent
     {
-        public IReadOnlyCollection<ICoinsAddedEvent> SubEvents { get; }
 
-        public CoinsCountingEvent(IEnumerable<ICoinsAddedEvent> subEvents)
+    }
+
+    internal class CoinsCountingEvent : ActionSubEvents<ICoinsAddedEvent>, ICoinsCountingEvent
+    {
+        public CoinsCountingEvent(IEnumerable<ICoinsAddedEvent> subEvents) : base(subEvents)
         {
-            SubEvents = subEvents.ToList();
+            
         }
     }
 }

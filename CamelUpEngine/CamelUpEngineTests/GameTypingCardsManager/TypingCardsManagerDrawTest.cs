@@ -1,4 +1,6 @@
-﻿using CamelUpEngine.Core.Enums;
+﻿#if DEBUG
+
+using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
@@ -58,3 +60,5 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         }
     }
 }
+
+#endif

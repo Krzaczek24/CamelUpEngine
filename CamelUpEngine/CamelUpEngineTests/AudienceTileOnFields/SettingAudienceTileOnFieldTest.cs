@@ -1,4 +1,6 @@
-﻿using CamelUpEngine;
+﻿#if DEBUG
+
+using CamelUpEngine;
 using CamelUpEngine.Core.Actions;
 using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
@@ -99,3 +101,5 @@ namespace TestCamelUpEngine.AudienceTileOnFields
             AudienceTilesManager.TestPlaceAudienceTile(game.CurrentPlayer, game.Fields, targetField, tileSide, out _, () => Guid.Empty);
     }
 }
+
+#endif

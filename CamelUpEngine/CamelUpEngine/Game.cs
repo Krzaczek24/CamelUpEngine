@@ -39,7 +39,7 @@ namespace CamelUpEngine
         public IReadOnlyCollection<ICamel> CamelsOrder => fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
 
         public bool GameIsOver { get; private set; }
-        public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
+        private bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
 
         public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
         {
@@ -70,6 +70,7 @@ namespace CamelUpEngine
             if (GameIsOver)
             {
                 FinishGame();
+                return ActionEventsCollector.GetActionEvents();
             }
 
             if (TurnIsOver)
@@ -129,15 +130,16 @@ namespace CamelUpEngine
 
         private void FinishGame()
         {
-            ActionEventsCollector.AddEvent(new GameOverEvent(this));
+            ActionEventsCollector.AddEvent(new EndOfTurnEvent());
             SummarizeCurrentTurn();
+            ActionEventsCollector.AddEvent(new GameOverEvent(this));
         }
 
         private void GoToNextTurn()
         {
             ActionEventsCollector.AddEvent(new EndOfTurnEvent());
             RemoveAllAudienceTiles();
-            dicer.Reset();
+            RefillDicer();
             SummarizeCurrentTurn();
             ActionEventsCollector.AddEvent(new NewTurnEvent());
         }
@@ -166,22 +168,31 @@ namespace CamelUpEngine
             ActionEventsCollector.AddEvent(new AllTypingCardsReturnedEvent(playerTypingCardsReturnedEvents));
         }
 
+        private void RefillDicer()
+        {
+            dicer.Reset();
+            ActionEventsCollector.AddEvent(new DicerRefilledEvent());
+        }
+
         private void RemoveAllAudienceTiles()
         {
+            List<IAudienceTileRemovementEvent> audienceTileRemovementEvents = new();
+
             var fieldsWithAudienceTile = fields.Where(field => field.AudienceTile != null);
             foreach (Field field in fieldsWithAudienceTile)
             {
+                audienceTileRemovementEvents.Add(new AudienceTileRemovementEvent(field.Index, field.AudienceTile));
                 field.RemoveAudienceTile();
-                ActionEventsCollector.AddEvent(new AudienceTileRemovementEvent(field.Index, field.AudienceTile));
             }
+
+            ActionEventsCollector.AddEvent(new AllAudienceTilesRemovementEvent(audienceTileRemovementEvents));
         }
 
         private void SetNextPlayerAsCurrent()
         {
             int currentIndex = players.ToList().IndexOf(currentPlayer);
             int playersCount = players.Count;
-            currentPlayer = players.ElementAt(++currentIndex % playersCount);
-            ActionEventsCollector.AddEvent(new ChangedCurrentPlayerEvent(currentPlayer));
+            ActionEventsCollector.AddEvent(new ChangedCurrentPlayerEvent(currentPlayer, currentPlayer = players.ElementAt(++currentIndex % playersCount)));
         }
 
         private void MoveCamel(Colour colour, int value)
