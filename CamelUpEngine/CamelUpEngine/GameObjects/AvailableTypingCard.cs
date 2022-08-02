@@ -17,5 +17,15 @@ namespace CamelUpEngine.GameObjects
         {
             DrawGuid = drawGuid;
         }
+
+        public override bool Equals(object obj)
+        {
+            TypingCard other = obj as TypingCard;
+            if (other == null)
+                return false;
+            return Colour == other.Colour && Value == other.Value;
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

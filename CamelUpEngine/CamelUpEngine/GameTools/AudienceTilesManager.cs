@@ -85,13 +85,13 @@ namespace CamelUpEngine.GameTools
             }
 
             removePreviousTileEvent = null;
-            Field previousAudienceTileField = (Field)fields.SingleOrDefault(field => field.AudienceTile?.Owner == player);
+            Field previousAudienceTileField = fields.SingleOrDefault(field => field.AudienceTile?.Owner == player);
             if (previousAudienceTileField != null)
             {
-                previousAudienceTileField.RemoveAudienceTile();
                 removePreviousTileEvent = new AudienceTileRemovementEvent(previousAudienceTileField.Index, previousAudienceTileField.AudienceTile);
+                previousAudienceTileField.RemoveAudienceTile();
             }
-            Field targetField = (Field)fields.Single(field => field.Index == availableField.Index);
+            Field targetField = fields.Single(field => field.Index == availableField.Index);
             targetField.PutAudienceTile(new AudienceTile(player, audienceTileSide));
             IAudienceTilePlacementEvent placementEvent = new AudienceTilePlacementEvent(targetField.Index, targetField.AudienceTile);
 

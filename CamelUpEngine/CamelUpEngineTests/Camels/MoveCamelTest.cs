@@ -1,7 +1,7 @@
 ﻿#if DEBUG
 using CamelUpEngine;
 using CamelUpEngine.Core.Actions.Events;
-using CamelUpEngine.Helpers.TestHelpers;
+using CamelUpEngine.Helpers;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -26,7 +26,7 @@ namespace TestCamelUpEngine.Camels
             var camelsInitialFieldIndexes = game.CamelPositions;
 
             var drawDiceActionResult = game.DrawDice();
-            var drawnDiceActionEvent = drawDiceActionResult.GetActionEvent<IDiceDrawnEvent>();
+            var drawnDiceActionEvent = drawDiceActionResult.GetEvent<IDiceDrawnEvent>();
             var drawnDice = drawnDiceActionEvent.DrawnDice;
 
             int fieldIndexShift = drawnDice.Value;

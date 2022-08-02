@@ -82,6 +82,8 @@ namespace TestCamelUpEngine.RealGame
                 Assert.That(events, Has.One.AssignableTo<IGameOverEvent>());
                 Assert.That(events, Has.None.AssignableTo<INewTurnEvent>());
                 Assert.That(events, Has.None.AssignableTo<IChangedCurrentPlayerEvent>());
+
+                Assert.That(game.Players.Select(player => player.TypingCards), Has.All.Empty);
             }
             else if (events.Any(@event => @event is IEndOfTurnEvent))
             {
@@ -92,6 +94,10 @@ namespace TestCamelUpEngine.RealGame
                 Assert.That(events, Has.One.AssignableTo<IAllTypingCardsReturnedEvent>());
                 Assert.That(events, Has.One.AssignableTo<INewTurnEvent>());
                 Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+                
+                Assert.That(game.Fields.Select(field => field.AudienceTile), Has.All.Null);
+                Assert.That(game.DrawnDices, Is.Empty);
+                Assert.That(game.Players.Select(player => player.TypingCards), Has.All.Empty);
             }
             else
             {
@@ -125,22 +131,58 @@ namespace TestCamelUpEngine.RealGame
 
         private ActionEvents TestDrawingTypingCard()
         {
-            // TODO: TestDrawingTypingCard
-            ActionEvents events = game.DrawTypingCard(game.AvailableTypingCards.GetRandom());
+            var availableCards = game.AvailableTypingCards;
+            ActionEvents events = game.DrawTypingCard(availableCards.GetRandom());
+
             CollectionAssert.AllItemsAreNotNull(events);
             CollectionAssert.AllItemsAreUnique(events);
+
+            Assert.That(events, Has.One.AssignableTo<ITypingCardDrawnEvent>());
             Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            var drawCardEvent = events.GetEvent<ITypingCardDrawnEvent>();
+            Assert.AreEqual(events.GetEvent<IChangedCurrentPlayerEvent>().PreviousPlayer, drawCardEvent.Player);
+            CollectionAssert.Contains(availableCards, drawCardEvent.TypingCard);
+            if (drawCardEvent.TypingCard.Value != TypingCardValue.Low)
+            {
+                CollectionAssert.DoesNotContain(game.AvailableTypingCards, drawCardEvent.TypingCard);
+            }
+            else
+            {
+                Assert.That(game.AvailableTypingCards.Where(card => card == drawCardEvent.TypingCard).Count(), Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(1));
+            }
 
             return events;
         }
 
         private ActionEvents TestPlacingAudienceTile()
         {
-            // TODO: TestPlacingAudienceTile
-            ActionEvents events = game.PlaceAudienceTile(game.AudienceTileAvailableFields.GetRandom(), Enum.GetValues<AudienceTileSide>().GetRandom());
+            var player = game.CurrentPlayer;
+            bool playerAlreadPlacedAudienceTile = game.Fields.Any(field => field.AudienceTile?.Owner == game.CurrentPlayer);
+            var field = game.AudienceTileAvailableFields.GetRandom();
+            var tileSide = Enum.GetValues<AudienceTileSide>().GetRandom();
+            ActionEvents events = game.PlaceAudienceTile(field, tileSide);
+
             CollectionAssert.AllItemsAreNotNull(events);
             CollectionAssert.AllItemsAreUnique(events);
+
+            Assert.That(events, Has.One.AssignableTo<IAudienceTilePlacementEvent>());
+            if (playerAlreadPlacedAudienceTile)
+            {
+                Assert.That(events, Has.One.AssignableTo<IAudienceTileRemovementEvent>());
+                var @event = events.GetEvent<IAudienceTileRemovementEvent>();
+                Assert.AreEqual(player, @event.AudienceTile.Owner);
+            }
+            else
+            {
+                Assert.That(events, Has.None.AssignableTo<IAudienceTileRemovementEvent>());
+            }
             Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            var placementEvent = events.GetEvent<IAudienceTilePlacementEvent>();
+            Assert.AreEqual(field.Index, placementEvent.FieldIndex);
+            Assert.AreEqual(tileSide, placementEvent.AudienceTile.Side);
+            Assert.AreEqual(player, placementEvent.AudienceTile.Owner);
 
             return events;
         }
@@ -149,8 +191,10 @@ namespace TestCamelUpEngine.RealGame
         {
             // TODO: TestMakingBet
             ActionEvents events = game.MakeBet(ColourHelper.AllCamelColours.GetRandom(), Enum.GetValues<BetType>().GetRandom());
+
             CollectionAssert.AllItemsAreNotNull(events);
             CollectionAssert.AllItemsAreUnique(events);
+
             Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
 
             return events;
