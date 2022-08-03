@@ -22,14 +22,14 @@ namespace TestCamelUpEngine.GameTypingCardsManager
             manager.Reset();
         }
 
-        [Test]
+        [Test, Sequential]
         public void TestAvailableCards()
         {
             var expectedCards = TypingCardHelper.CardRepository.Where(card => card.Value == TypingCardValue.High).ToList();
             CollectionAssert.AreEquivalent(expectedCards, manager.AvailableCards);
         }
 
-        [Test]
+        [Test, Sequential]
         public void TestDrawingCards()
         {
             var expectedTopCards = TypingCardHelper.GetCards(TypingCardValue.High).ToList();

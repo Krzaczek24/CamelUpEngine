@@ -69,36 +69,25 @@ namespace CamelUpEngine.GameTools
             }
         }
 
-        public static Dictionary<Colour, Field> SetCamelsOnBoard(Game game)
+        public static void SetCamelsOnBoard(Game game)
         {
-            Dictionary<Colour, Field> camelPositions = new();
-
             var drawnDices = Dicer.DrawDicesForInitialCamelsPlacement();
             foreach (IDrawnDice dice in drawnDices)
             {
-                Field camelField = SetCamelInitialPosition(game, camelPositions, dice.Colour, dice.Value);
-                camelPositions.Add(dice.Colour, camelField);
+                SetCamelInitialPosition(game, dice.Colour, dice.Value);
             }
-
-            return camelPositions;
         }
 
-        private static Field SetCamelInitialPosition(Game game, Dictionary<Colour, Field> camelPositions, Colour camelColour, int position)
+        private static void SetCamelInitialPosition(Game game, Colour camelColour, int position)
         {
             if (ColourHelper.IsMadColour(camelColour))
             {
                 position = game.Fields.Count + position + 1;
             }
 
-            if (camelPositions.TryGetValue(camelColour, out Field camelField))
-            {
-                throw new CamelAlreadyOnboardException(camelColour, camelField.Index);
-            }
-
             Camel camel = game.Camels.Single(camel => camel.Colour == camelColour) as Camel;
             Field field = game.Fields.Single(field => field.Index == position) as Field;
             field.PutCamels(new[] { camel }.ToList());
-            return field;
         }
     }
 }

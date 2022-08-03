@@ -7,9 +7,9 @@ namespace CamelUpEngine.Core.Actions.Events
 
     }
 
-    internal class CoinsCountingEvent : ActionSubEvents<ICoinsAddedEvent>, ICoinsCountingEvent
+    internal class TypingCardsSummaryEvent : ActionSubEvents<ICoinsAddedEvent>, ICoinsCountingEvent
     {
-        public CoinsCountingEvent(IEnumerable<ICoinsAddedEvent> subEvents) : base(subEvents)
+        public TypingCardsSummaryEvent(IEnumerable<ICoinsAddedEvent> subEvents) : base(subEvents)
         {
             
         }

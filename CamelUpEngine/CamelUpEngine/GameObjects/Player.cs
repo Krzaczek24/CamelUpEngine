@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Core.Enums;
+﻿using CamelUpEngine.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,7 @@ namespace CamelUpEngine.GameObjects
         public string Name { get; }
         public int Coins { get; }
         public IReadOnlyCollection<ITypingCard> TypingCards { get; }
+        //internal IReadOnlyCollection<IBetCard> BetCards { get; }
     }
 
     internal sealed class Player : IPlayer
@@ -19,13 +20,15 @@ namespace CamelUpEngine.GameObjects
         public string Name { get; }
         public int Coins { get; private set; } = IPlayer.InitialCoinsCount;
         public  IReadOnlyCollection<ITypingCard> TypingCards => typingCards;
+        internal IReadOnlyCollection<IBetCard> BetCards => betCards;
 
         private readonly List<TypingCard> typingCards = new();
+        private readonly List<BetCard> betCards = new();
 
-        private Player() { }
         public Player(string name)
         {
             Name = name;
+            betCards = ColourHelper.AllCardColours.Select(colour => new BetCard(colour, this)).ToList();
         }
 
         public int AddCoins(int count)

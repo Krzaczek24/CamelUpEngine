@@ -1,5 +1,6 @@
 ﻿using CamelUpEngine.GameObjects;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CamelUpEngine.Core.Actions.Events
 {
@@ -14,10 +15,10 @@ namespace CamelUpEngine.Core.Actions.Events
         public IPlayer Player { get; }
         public IReadOnlyCollection<ITypingCard> TypingCards { get; }
 
-        public PlayerTypingCardsReturnedEvent(IPlayer player, IReadOnlyCollection<ITypingCard> typingCards)
+        public PlayerTypingCardsReturnedEvent(IPlayer player, IEnumerable<ITypingCard> typingCards)
         {
             Player = player;
-            TypingCards = typingCards;
+            TypingCards = typingCards.ToList();
         }
     }
 }

@@ -82,4 +82,25 @@ namespace CamelUpEngine.GameObjects
         private string CamelsDesc() => camels.Any() ? $"with {camels.Count} camel{(camels.Count > 1 ? "s" : "")}" : "with no camels";
         private string AudienceTileDesc() => $"with{(AudienceTile == null ? "out" : "")} audience tile";
     }
+
+    internal static class FieldHelper
+    {
+        internal static List<Field> GetDeepCopy(this IEnumerable<IField> fields)
+        {
+            List<Field> copiedFields = new();
+
+            foreach (var field in fields)
+            {
+                Field copiedField = new(field.Index);
+                if (field.AudienceTile != null)
+                {
+                    copiedField.PutAudienceTile(new AudienceTile(field.AudienceTile.Owner, field.AudienceTile.Side));
+                }
+                copiedField.PutCamels(field.Camels.Select(camel => new Camel(camel.Colour)).ToList());
+                copiedFields.Add(copiedField);
+            }
+
+            return copiedFields;
+        }
+    }
 }

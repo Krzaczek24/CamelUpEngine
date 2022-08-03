@@ -15,32 +15,17 @@ namespace CamelUpEngine.GameTools
         private Func<Guid> GenerateGuid { get; }
         internal Guid DrawGuid { get; private set; }
 
-        internal AudienceTilesManager(IEnumerable<IField> fields)
+        internal AudienceTilesManager(IEnumerable<Field> fields, Func<Guid> guidGenerationFunction = null)
         {
-            this.fields = fields.Cast<Field>().ToList();
-            DrawGuid = (GenerateGuid = Guid.NewGuid)();
-        }
-
-        private AudienceTilesManager(IEnumerable<IField> fields, Func<Guid> guidGenerationFunction)
-        {
-            this.fields = new List<Field>();
-            foreach (var field in fields)
-            {
-                Field copiedField = new(field.Index);
-                if (field.AudienceTile != null)
-                {
-                    copiedField.PutAudienceTile(new AudienceTile(field.AudienceTile.Owner, field.AudienceTile.Side));
-                }
-                copiedField.PutCamels(field.Camels.Select(camel => new Camel(camel.Colour)).ToList());
-                this.fields.Add(copiedField);
-            }
+            this.fields = fields.ToList();
             DrawGuid = (GenerateGuid = guidGenerationFunction ?? Guid.NewGuid)();
         }
 
         public static IAudienceTilePlacementEvent TestPlaceAudienceTile(IPlayer player, IEnumerable<IField> fields, IAvailableField targetField, AudienceTileSide tileSide, 
             out IAudienceTileRemovementEvent removementEvent, Func<Guid> guidGenerationFunction = null)
         {
-            AudienceTilesManager manager = new(fields, guidGenerationFunction);
+            List<Field> copiedFields = fields.GetDeepCopy();
+            AudienceTilesManager manager = new(copiedFields, guidGenerationFunction);
             return manager.PlaceAudienceTile(player, targetField, tileSide, out removementEvent);
         }
 
