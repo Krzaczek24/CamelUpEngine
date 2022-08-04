@@ -48,7 +48,7 @@ namespace CamelUpEngine.GameTools
             }
         }
 
-        public static IEnumerable<Camel> GenerateCamels()
+        private static IEnumerable<Camel> GenerateCamels()
         {
             foreach (Colour colour in ColourHelper.AllCamelColours)
             {
@@ -71,21 +71,22 @@ namespace CamelUpEngine.GameTools
 
         public static void SetCamelsOnBoard(Game game)
         {
+            var camels = GenerateCamels();
             var drawnDices = Dicer.DrawDicesForInitialCamelsPlacement();
             foreach (IDrawnDice dice in drawnDices)
             {
-                SetCamelInitialPosition(game, dice.Colour, dice.Value);
+                SetCamelInitialPosition(game, camels, dice.Colour, dice.Value);
             }
         }
 
-        private static void SetCamelInitialPosition(Game game, Colour camelColour, int position)
+        private static void SetCamelInitialPosition(Game game, IEnumerable<ICamel> camels, Colour camelColour, int position)
         {
             if (ColourHelper.IsMadColour(camelColour))
             {
                 position = game.Fields.Count + position + 1;
             }
 
-            Camel camel = game.Camels.Single(camel => camel.Colour == camelColour) as Camel;
+            Camel camel = camels.Single(camel => camel.Colour == camelColour) as Camel;
             Field field = game.Fields.Single(field => field.Index == position) as Field;
             field.PutCamels(new[] { camel }.ToList());
         }

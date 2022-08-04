@@ -12,8 +12,14 @@ namespace CamelUpEngine.GameTools
         private readonly List<Field> fields;
         private readonly Dictionary<Colour, Field> camelPositions;
 
+        private IReadOnlyDictionary<Colour, int> camelPositionsCache = null;
+        private IReadOnlyCollection<ICamel> allCamelsOrderCache = null;
+        private IReadOnlyCollection<ICamel> camelsOrderCache = null;
+
         public bool AnyCamelPassFinishLine { get; private set; }
-        public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
+        public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositionsCache ??= camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
+        public IReadOnlyCollection<ICamel> AllCamelsOrder => allCamelsOrderCache ??= fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
+        public IReadOnlyCollection<ICamel> CamelsOrder => camelsOrderCache ??= AllCamelsOrder.Where(camel => !camel.IsMad).ToList();
 
         internal CamelTrafficManager(IEnumerable<Field> fields)
         {
@@ -73,6 +79,8 @@ namespace CamelUpEngine.GameTools
 
             field.PutCamels(camels);
             camels.ForEach(camel => camelPositions[camel.Colour] = field);
+
+            ClearCamelCaches();
         }
 
         private void PerformEndingCamelMove(List<Camel> camels, int newFieldIndex)
@@ -125,6 +133,13 @@ namespace CamelUpEngine.GameTools
             }
 
             return camelPositions;
+        }
+
+        private void ClearCamelCaches()
+        {
+            camelPositionsCache = null;
+            camelsOrderCache = null;
+            allCamelsOrderCache = null;
         }
     }
 }

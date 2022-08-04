@@ -4,7 +4,6 @@ using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +18,6 @@ namespace CamelUpEngine
 
         private Player currentPlayer;
         private readonly List<Player> players;
-        private readonly List<Camel> camels;
         private readonly List<Field> fields;
         private readonly Dicer dicer;
         private readonly TypingCardsManager cardManager;
@@ -31,17 +29,13 @@ namespace CamelUpEngine
         public ActionEvents History => ActionEventsCollector.GetGameEvents();
         public IPlayer CurrentPlayer => currentPlayer;
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
-        public IReadOnlyCollection<ICamel> Camels => camels.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
+        public IReadOnlyCollection<ICamel> Camels => camelsManager.AllCamelsOrder;
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
-        public IReadOnlyCollection<ICamel> AllCamelsOrder => fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
-        public IReadOnlyCollection<ICamel> CamelsOrder => AllCamelsOrder.Where(camel => !camel.IsMad).ToList();
         public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? winnerBetsStack : null;
         public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? loserBetsStack : null;
-        public IReadOnlyDictionary<Colour, int> CamelPositions => camelsManager.CamelPositions;
-        // TODO: wynieść co się da do CamelTraficManager-a i usunąć CamelMoveTester-a
 
         public bool GameIsOver => camelsManager.AnyCamelPassFinishLine;
         private bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
@@ -49,8 +43,7 @@ namespace CamelUpEngine
         public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
         {
             ActionEventsCollector.Reset();
-            players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();
-            camels = GameInitializer.GenerateCamels().ToList();
+            players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();            
             fields = GameInitializer.GenerateFields(fieldsCount).ToList();
             GameInitializer.SetCamelsOnBoard(this);
             dicer = new();
@@ -164,7 +157,7 @@ namespace CamelUpEngine
                 if (returnedTypingCard.Any())
                 {
                     playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
-                    int earnedCoins = TypingCardsManager.CountCoins(AllCamelsOrder, player.TypingCards);
+                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.AllCamelsOrder, player.TypingCards);
                     if (earnedCoins != 0)
                     {
                         playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
@@ -179,8 +172,8 @@ namespace CamelUpEngine
 
         private void SummarizeBets()
         {
-            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(CamelsOrder.First(), winnerBetsStack);
-            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(CamelsOrder.Last(), loserBetsStack);
+            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(camelsManager.CamelsOrder.First(), winnerBetsStack);
+            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(camelsManager.CamelsOrder.Last(), loserBetsStack);
             ActionEventsCollector.AddEvent(new BetsSummaryEvent(winnerRewards, loserRewards));
         }
 
