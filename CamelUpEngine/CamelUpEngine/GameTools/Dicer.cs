@@ -13,6 +13,7 @@ namespace CamelUpEngine.GameTools
         private readonly List<Dice> remainingDices = new();
         private readonly List<DrawnDice> drawnDices = new();
         public IReadOnlyCollection<IDrawnDice> DrawnDices => drawnDices.ToList();
+        public bool IsEmpty => !remainingDices.Any();
 
         public Dicer()
         {

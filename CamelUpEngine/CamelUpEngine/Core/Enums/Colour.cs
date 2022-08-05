@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace CamelUpEngine.Core.Enums
+﻿namespace CamelUpEngine.Core.Enums
 {
     public enum Colour
     {

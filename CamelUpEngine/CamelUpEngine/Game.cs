@@ -65,8 +65,7 @@ namespace CamelUpEngine
             IDrawnDice drawnDice = dicer.DrawDice();
             ActionEventsCollector.AddEvent(new DiceDrawnEvent(drawnDice));
             ActionEventsCollector.AddEvent(new CoinsAddedEvent(currentPlayer, currentPlayer.AddCoins(1)));
-
-            camelsManager.MoveCamel(drawnDice.Colour, drawnDice.Value);
+            ActionEventsCollector.AddEvent(camelsManager.MoveCamel(drawnDice.Colour, drawnDice.Value));
 
             if (GameIsOver)
             {

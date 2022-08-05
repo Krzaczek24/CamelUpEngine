@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CamelUpEngineTests.GameTypingCardsManager
+namespace TestCamelUpEngine.GameTypingCardsManager
 {
     public class TypingCardsManagerCoinsCountTest
     {

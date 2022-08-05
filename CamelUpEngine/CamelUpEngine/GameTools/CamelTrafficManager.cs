@@ -1,5 +1,7 @@
-﻿using CamelUpEngine.Core.Actions.Events;
+﻿using CamelUpEngine.Core.Actions;
+using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Extensions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.Helpers;
 using System.Collections.Generic;
@@ -33,24 +35,27 @@ namespace CamelUpEngine.GameTools
             camelPositions = GetCamelPositions();
         }
 
-        public void MoveCamel(Colour colour, int value)
+        public IReadOnlyCollection<IActionEvent> MoveCamel(Colour colour, int value)
         {
+            List<IActionEvent> events = new();
+
             bool isMadColour = ColourHelper.IsMadColour(colour);
-            if (isMadColour && ShouldSwitchMadColour(colour))
+            if (isMadColour && ShouldSwitchMadColour(colour, out IMadCamelColourSwitchedEvent madCamelColourSwitchedEvent))
             {
                 colour = ColourHelper.GetOppositeMadColour(colour);
+                events.Add(madCamelColourSwitchedEvent);
             }
 
             // camel move
             Field field = camelPositions[colour];
             List<Camel> camels = field.TakeOffCamel(colour);
             int newFieldIndex = field.Index + value;
-            ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex));
+            events.Add(new CamelsMovedEvent(camels, field.Index, newFieldIndex));
             if (DoesCamelGoThroughFinishLine(newFieldIndex))
             {
                 PerformEndingCamelMove(camels, newFieldIndex);
                 AnyCamelPassFinishLine = true;
-                return;
+                return events;
             }
             field = fields[newFieldIndex - 1];
 
@@ -58,22 +63,22 @@ namespace CamelUpEngine.GameTools
             AudienceTile audienceTile = (AudienceTile)field.AudienceTile;
             if (audienceTile != null)
             {
-                ActionEventsCollector.AddEvent(new CamelsStoodOnAudienceTileEvent(audienceTile));
-                ActionEventsCollector.AddEvent(new CoinsAddedEvent(audienceTile.Owner, ((Player)audienceTile.Owner).AddCoins(1)));
+                events.Add(new CamelsStoodOnAudienceTileEvent(audienceTile));
+                events.Add(new CoinsAddedEvent(audienceTile.Owner, ((Player)audienceTile.Owner).AddCoins(1)));
                 newFieldIndex = field.Index + audienceTile.MoveValue;
-                ActionEventsCollector.AddEvent(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
+                events.Add(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
                 if (DoesCamelGoThroughFinishLine(newFieldIndex))
                 {
                     PerformEndingCamelMove(camels, newFieldIndex);
                     AnyCamelPassFinishLine = true;
-                    return;
+                    return events;
                 }
                 field = fields[newFieldIndex - 1];
                 if (audienceTile.Side == AudienceTileSide.Booing)
                 {
                     field.PutCamels(camels, StackPutType.Bottom);
                     camels.ForEach(camel => camelPositions[camel.Colour] = field);
-                    return;
+                    return events;
                 }
             }
 
@@ -81,6 +86,7 @@ namespace CamelUpEngine.GameTools
             camels.ForEach(camel => camelPositions[camel.Colour] = field);
 
             ClearCamelCaches();
+            return events;
         }
 
         private void PerformEndingCamelMove(List<Camel> camels, int newFieldIndex)
@@ -99,25 +105,26 @@ namespace CamelUpEngine.GameTools
 
         private bool DoesCamelGoThroughFinishLine(int newFieldIndex) => newFieldIndex <= 0 || newFieldIndex > fields.Count;
 
-        private bool ShouldSwitchMadColour(Colour colour)
+        private bool ShouldSwitchMadColour(Colour colour, out IMadCamelColourSwitchedEvent madCamelColourSwitchedEvent)
         {
             if (AreMadCamelsOnTheSameField() && IsNearestCamelOnBackMad(colour))
             {
-                ActionEventsCollector.AddEvent(new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne));
+                madCamelColourSwitchedEvent = new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne);
                 return true;
             }
 
             if (!AnyNotMadCamelsOnBack(colour) && AnyNotMadCamelsOnBack(ColourHelper.GetOppositeMadColour(colour)))
             {
-                ActionEventsCollector.AddEvent(new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels));
+                madCamelColourSwitchedEvent = new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels);
                 return true;
             }
 
+            madCamelColourSwitchedEvent = null;
             return false;
         }
 
-        private bool IsNearestCamelOnBackMad(Colour colour) => camelPositions[colour].Camels.TakeWhile(camel => camel.Colour == colour).LastOrDefault()?.IsMad ?? false;
-        private bool AnyNotMadCamelsOnBack(Colour colour) => camelPositions[colour].Camels.TakeWhile(camel => camel.Colour == colour).Where(camel => !camel.IsMad).Any();
+        private bool IsNearestCamelOnBackMad(Colour colour) => camelPositions[colour].Camels.TakeUntil(camel => camel.Colour == colour).LastOrDefault()?.IsMad ?? false;
+        private bool AnyNotMadCamelsOnBack(Colour colour) => camelPositions[colour].Camels.TakeUntil(camel => camel.Colour == colour).Where(camel => !camel.IsMad).Any();
         private bool AreMadCamelsOnTheSameField() => camelPositions[Colour.White] == camelPositions[Colour.Black];
 
         private Dictionary<Colour, Field> GetCamelPositions()

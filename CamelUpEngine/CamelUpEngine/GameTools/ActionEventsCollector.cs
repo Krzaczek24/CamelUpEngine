@@ -12,6 +12,7 @@ namespace CamelUpEngine.GameTools
         private static List<IActionEvent> actionEvents = new();
 
         public static void AddEvent(IActionEvent actionEvent) => actionEvents.Add(actionEvent);
+        public static void AddEvent(IEnumerable<IActionEvent> actionEvent) => actionEvents.AddRange(actionEvent);
         public static Guid AddUnconfirmedEvent(IActionEvent actionEvent)
         {
             Guid guid = Guid.NewGuid();
