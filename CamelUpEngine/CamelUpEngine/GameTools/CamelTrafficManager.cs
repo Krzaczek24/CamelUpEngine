@@ -19,9 +19,10 @@ namespace CamelUpEngine.GameTools
         private IReadOnlyCollection<ICamel> camelsOrderCache = null;
 
         public bool AnyCamelPassFinishLine { get; private set; }
+        public IReadOnlyCollection<IField> Fields => fields;
         public IReadOnlyDictionary<Colour, int> CamelPositions => camelPositionsCache ??= camelPositions.ToDictionary(entry => entry.Key, entry => entry.Value.Index);
-        public IReadOnlyCollection<ICamel> AllCamelsOrder => allCamelsOrderCache ??= fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
-        public IReadOnlyCollection<ICamel> CamelsOrder => camelsOrderCache ??= AllCamelsOrder.Where(camel => !camel.IsMad).ToList();
+        public IReadOnlyCollection<ICamel> OrderedAllCamels => allCamelsOrderCache ??= fields.Reverse<IField>().SelectMany(field => field.Camels).ToList();
+        public IReadOnlyCollection<ICamel> OrderedCamels => camelsOrderCache ??= OrderedAllCamels.Where(camel => !camel.IsMad).ToList();
 
         internal CamelTrafficManager(IEnumerable<Field> fields)
         {
@@ -40,10 +41,11 @@ namespace CamelUpEngine.GameTools
             List<IActionEvent> events = new();
 
             bool isMadColour = ColourHelper.IsMadColour(colour);
-            if (isMadColour && ShouldSwitchMadColour(colour, out IMadCamelColourSwitchedEvent madCamelColourSwitchedEvent))
+            if (isMadColour && ShouldSwitchMadColour(colour, out MadCamelColourSwitchReason madCamelColourSwitchReason))
             {
+                Colour originalColour = colour;
                 colour = ColourHelper.GetOppositeMadColour(colour);
-                events.Add(madCamelColourSwitchedEvent);
+                events.Add(new MadCamelColourSwitchedEvent(originalColour, colour, madCamelColourSwitchReason));
             }
 
             // camel move
@@ -71,6 +73,8 @@ namespace CamelUpEngine.GameTools
                 {
                     PerformEndingCamelMove(camels, newFieldIndex);
                     AnyCamelPassFinishLine = true;
+
+                    ClearCamelCaches();
                     return events;
                 }
                 field = fields[newFieldIndex - 1];
@@ -78,6 +82,8 @@ namespace CamelUpEngine.GameTools
                 {
                     field.PutCamels(camels, StackPutType.Bottom);
                     camels.ForEach(camel => camelPositions[camel.Colour] = field);
+
+                    ClearCamelCaches();
                     return events;
                 }
             }
@@ -105,21 +111,21 @@ namespace CamelUpEngine.GameTools
 
         private bool DoesCamelGoThroughFinishLine(int newFieldIndex) => newFieldIndex <= 0 || newFieldIndex > fields.Count;
 
-        private bool ShouldSwitchMadColour(Colour colour, out IMadCamelColourSwitchedEvent madCamelColourSwitchedEvent)
+        private bool ShouldSwitchMadColour(Colour colour, out MadCamelColourSwitchReason madCamelColourSwitchReason)
         {
             if (AreMadCamelsOnTheSameField() && IsNearestCamelOnBackMad(colour))
             {
-                madCamelColourSwitchedEvent = new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne);
+                madCamelColourSwitchReason = MadCamelColourSwitchReason.OtherMadCamelIsDirectlyOnBackOfOtherOne;
                 return true;
             }
 
             if (!AnyNotMadCamelsOnBack(colour) && AnyNotMadCamelsOnBack(ColourHelper.GetOppositeMadColour(colour)))
             {
-                madCamelColourSwitchedEvent = new MadCamelColourSwitchedEvent(MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels);
+                madCamelColourSwitchReason = MadCamelColourSwitchReason.OnlyOneMadCamelIsCarryingNonMadCamels;
                 return true;
             }
 
-            madCamelColourSwitchedEvent = null;
+            madCamelColourSwitchReason = MadCamelColourSwitchReason.UNDEFINED;
             return false;
         }
 

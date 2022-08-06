@@ -1,8 +1,8 @@
-﻿#if DEBUG
-using CamelUpEngine;
+﻿using CamelUpEngine;
 using CamelUpEngine.Core.Actions;
 using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
+using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
@@ -20,26 +20,153 @@ namespace TestCamelUpEngine.Camels
         private const int LAST = 6; // CamelMoveTester.Camels.Count - 1
         private const int MEETUP_FIELD_INDEX = 10;
         private static IReadOnlyCollection<string> players = new[] { "Bezimienny", "Diego", "Gorn", "Milten", "Lester" };
+        private Game game;
         private CamelTrafficManager manager;
 
         [SetUp]
         public void SetUp()
         {
-            manager = new(new Game(players).Fields);
+            game = new Game(players);
+            manager = new(game.Fields);
         }
 
-        [Test, Sequential, Repeat(10000)]
-        public void TestCamelMovingInGame()
+        [Test, Sequential, Repeat(1000)]
+        public void TestCamelSingleMove()
         {
             var dicer = new Dicer();
 
             for (int moves = 10; moves > 0; moves--)
             {
-                TestCameSingleMove(dicer);
+                TestCamelSingleMove(dicer);
             }
         }
 
-        private void TestCameSingleMove(Dicer dicer)
+        // TODO: zweryfikować koleność wielbłądów na polach
+        [Test, Sequential, Repeat(1000)]
+        public void TestStackMove()
+        {
+            MoveAllCamelsOnDifferentField();
+            var camelColours = manager.OrderedAllCamels.Reverse().GetColours().ToList();
+            var camels = new Dictionary<char, Colour>()
+            {
+                ['A'] = camelColours.ElementAt(0),
+                ['B'] = camelColours.ElementAt(1),
+                ['C'] = camelColours.ElementAt(2),
+                ['D'] = camelColours.ElementAt(3),
+                ['E'] = camelColours.ElementAt(4),
+                ['X'] = camelColours.ElementAt(5),
+                ['Y'] = camelColours.ElementAt(6),
+            };
+            // (A) B C D E X Y [+1]
+            TestStackMove(camels['A'], 1, 2, 0, 2);
+            //    A
+            // _ (B) C D E X Y [+1]
+            TestStackMove(camels['B'], 1, 3, 0, 3);
+            //      A
+            //     (B)
+            // _ _  C  D E X Y [+1]
+            TestStackMove(camels['B'], 1, 4, 1, 3);
+            //         A
+            //         B
+            // _ _  C  D E X (Y) [-1]
+            TestStackMove(camels['Y'], -1, 6, 0, 2);
+            //         A
+            //         B    Y
+            // _ _  C  D E (X) [-1]
+            TestStackMove(camels['X'], -1, 6, 1, 1);
+            //         A
+            //         B Y  
+            // _ _ (C) D E X [+2]
+            TestStackMove(camels['C'], 2, 5, 0, 3);
+            //       A C
+            //       B Y  
+            // _ _ _ D E (X) [-3]
+            TestStackMove(camels['X'], -3, 6, 1, 1);
+            //       (A)
+            //   C    B
+            // _ Y _  D E X [+1]
+            TestStackMove(camels['A'], 1, 5, 2, 2);
+            //   C   B (A)
+            // _ Y _ D  E X [+1]
+            TestStackMove(camels['A'], 1, 6, 1, 2);
+            //   C   B   (A)
+            // _ Y _ D  E X [+1]
+            TestStackMove(camels['A'], 1, 7, 1, 1);
+            //   C   B
+            // _ Y _ D E X A
+        }
+
+        // TODO: zweryfikować koleność wielbłądów na polach
+        [Test, Sequential]
+        public void TestSteppingOnAudienceTile()
+        {
+            const int booingTileFieldIndex = 10;
+            const int cheeringTileFieldIndex = 12;
+
+            IAvailableField field = game.AudienceTileAvailableFields.Single(field => field.Index == booingTileFieldIndex);
+            game.PlaceAudienceTile(field, AudienceTileSide.Booing);
+
+            Assert.Throws<FieldExpiredAvailabilityException>(() => game.PlaceAudienceTile(field, AudienceTileSide.Cheering));
+
+            field = game.AudienceTileAvailableFields.Single(field => field.Index == cheeringTileFieldIndex);
+            game.PlaceAudienceTile(field, AudienceTileSide.Cheering);
+
+            manager = new(game.Fields);
+            MoveAllCamelsOnDifferentField();
+            var camelColours = manager.OrderedAllCamels.Reverse().GetColours().ToList();
+            var camels = new Dictionary<char, Colour>()
+            {
+                ['A'] = camelColours.ElementAt(0),
+                ['B'] = camelColours.ElementAt(1),
+                ['C'] = camelColours.ElementAt(2),
+                ['D'] = camelColours.ElementAt(3),
+                ['E'] = camelColours.ElementAt(4),
+                ['X'] = camelColours.ElementAt(5),
+                ['Y'] = camelColours.ElementAt(6),
+            };
+
+            TestStackMove(camels['A'], 7, 8, 0, 1);
+            TestStackMove(camels['B'], 6, 8, 0, 2);
+            TestStackMove(camels['C'], 6, 9, 0, 1);
+            TestStackMove(camels['D'], 5, 9, 0, 2);
+            // B (D)
+            // A  C  - _ + [+1]
+            TestStackMove(camels['D'], 1, 9, 2, 2);
+            // B  D
+            // A (C) - _ + [+1]
+            TestStackMove(camels['C'], 1, 9, 2, 2);
+            //  B  D
+            // (A) C - _ + [+2]
+            TestStackMove(camels['A'], 2, 9, 0, 4);
+            //   (D)
+            //    C
+            //    B
+            // _  A - _ + [+1]
+            TestStackMove(camels['D'], 1, 9, 4, 4);
+            //    C
+            //   (B)
+            //    A
+            // _  D - _ + [+3]
+            TestStackMove(camels['B'], 3, 13, 2, 2);
+            //    A        C
+            // _ (D) - _ + B [+3]
+            TestStackMove(camels['D'], 3, 13, 0, 4);
+            //           A
+            //           D
+            //           C
+            // _ _ - _ + B
+        }
+
+        private void TestStackMove(Colour camelToMoveColour, int moveValue, int expectedCamelField, int camelPrevFieldExpectedCount, int camelCurrentFieldExpectedCount)
+        {
+            int camelFieldIndex = manager.CamelPositions[camelToMoveColour];
+            manager.MoveCamel(camelToMoveColour, moveValue);
+            Assert.That(manager.CamelPositions[camelToMoveColour], Is.EqualTo(expectedCamelField));
+            Assert.That(manager.Fields.Single(field => field.Index == camelFieldIndex).Camels, Has.Count.EqualTo(camelPrevFieldExpectedCount));
+            Assert.That(manager.Fields.Single(field => field.Index == expectedCamelField).Camels, Has.Count.EqualTo(camelCurrentFieldExpectedCount));
+        }
+
+        private void TestCamelSingleMove(Dicer dicer)
         {
             if (dicer.IsEmpty)
             {
@@ -63,10 +190,10 @@ namespace TestCamelUpEngine.Camels
         [Test, Sequential]
         public void TestMovingNth([Values(FIRST, MIDDLE, LAST)] int index)
         {
-            MoveAllCamelsToTheSameField(MEETUP_FIELD_INDEX);
+            MoveAllCamelsOnTheSameField(MEETUP_FIELD_INDEX);
             const int shift = 1;
 
-            ICamel camel = manager.AllCamelsOrder.ElementAt(index);
+            ICamel camel = manager.OrderedAllCamels.ElementAt(index);
             var initialPositions = manager.CamelPositions;
             manager.MoveCamel(camel.Colour, shift);
             var newPositions = manager.CamelPositions;
@@ -74,11 +201,11 @@ namespace TestCamelUpEngine.Camels
             CollectionAssert.AreEqual(initialPositions.Select(p => p.Key), newPositions.Select(p => p.Key));
             Assert.That(initialPositions.Select(p => p.Value), Is.All.EqualTo(MEETUP_FIELD_INDEX));
 
-            var movedCamelColours = manager.AllCamelsOrder.TakeUntil(c => c == camel, inclusive: true).Select(c => c.Colour).ToList();
-            var notMovedCamelColours = manager.AllCamelsOrder.Select(c => c.Colour).Except(movedCamelColours).ToList();
+            var movedCamelColours = manager.OrderedAllCamels.TakeUntil(c => c == camel, inclusive: true).Select(c => c.Colour).ToList();
+            var notMovedCamelColours = manager.OrderedAllCamels.Select(c => c.Colour).Except(movedCamelColours).ToList();
 
             Assert.That(movedCamelColours, Has.Count.EqualTo(index + 1));
-            Assert.That(notMovedCamelColours, Has.Count.EqualTo(manager.AllCamelsOrder.Count() - (index + 1)));
+            Assert.That(notMovedCamelColours, Has.Count.EqualTo(manager.OrderedAllCamels.Count() - (index + 1)));
 
             var movedCamelPositions = newPositions.Where(p => movedCamelColours.Contains(p.Key)).Select(p => p.Value).ToList();
             var notMovedCamelPositions = newPositions.Where(p => notMovedCamelColours.Contains(p.Key)).Select(p => p.Value).ToList();
@@ -87,24 +214,58 @@ namespace TestCamelUpEngine.Camels
             Assert.That(notMovedCamelPositions, Is.All.EqualTo(MEETUP_FIELD_INDEX));
         }
 
-        private void MoveAllCamelsToTheSameField(int fieldIndex)
+        private void MoveCamelsOnField(int fieldIndex, params ICamel[] camels)
         {
-            foreach (Colour colour in ColourHelper.AllCardColours)
-            {
-                int difference = fieldIndex - manager.CamelPositions[colour];
-                manager.MoveCamel(colour, difference);
-            }
-
             IActionEvent switchEvent = null;
-            foreach (Colour colour in ColourHelper.MadColours)
+            var colours = camels.GetColours();
+            foreach (Colour colour in colours)
             {
                 Colour currentColour = switchEvent == null ? colour : ColourHelper.GetOppositeMadColour(colour);
-
                 int difference = fieldIndex - manager.CamelPositions[currentColour];
                 var events = manager.MoveCamel(currentColour, difference);
                 switchEvent = events.GetEvent<IMadCamelColourSwitchedEvent>();
             }
         }
+
+        private void MoveAllCamelsOnTheSameField(int fieldIndex)
+        {
+            IActionEvent switchEvent = null;
+            foreach (Colour colour in ColourHelper.AllCamelColours)
+            {
+                Colour currentColour = switchEvent == null ? colour : ColourHelper.GetOppositeMadColour(colour);
+                int difference = fieldIndex - manager.CamelPositions[currentColour];
+                var events = manager.MoveCamel(currentColour, difference);
+                switchEvent = events.GetEvent<IMadCamelColourSwitchedEvent>();
+            }
+        }
+
+        private void MoveAllCamelsOnDifferentField()
+        {
+            var fields = manager.Fields.Take(ColourHelper.AllCardColours.Count());
+            foreach (IField field in fields)
+            {
+                if (!field.Camels.Any())
+                {
+                    ICamel topCamel = manager.Fields.SkipWhile(field => field.Camels.Count() <= 1).First().Camels.First();
+                    int sourceIndex = manager.CamelPositions[topCamel.Colour];
+                    manager.MoveCamel(topCamel.Colour, field.Index - sourceIndex);
+                }
+            }
+            fields = manager.Fields.Except(fields).Take(ColourHelper.MadColours.Count());
+            foreach (IField field in fields)
+            {
+                if (!field.Camels.Any())
+                {
+                    ICamel topCamel = manager.Fields.Reverse().SkipWhile(field => field.Camels.Count() == 0).First().Camels.First();
+                    int sourceIndex = manager.CamelPositions[topCamel.Colour];
+                    manager.MoveCamel(topCamel.Colour, field.Index - sourceIndex);
+                }
+            }
+
+            fields = manager.Fields.Take(ColourHelper.AllCamelColours.Count());
+            var camelCount = fields.Select(field => field.Camels.Count());
+            Assert.That(camelCount, Is.All.EqualTo(1));
+            Assert.That(manager.Fields.Sum(field => field.Camels.Count()), Is.EqualTo(ColourHelper.AllCamelColours.Count()));
+        }
     }
 }
-#endif

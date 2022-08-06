@@ -72,6 +72,16 @@ namespace TestCamelUpEngine.RealGame
                 Assert.That(events, Has.One.AssignableTo<ICamelMovedEvent>());
             }
 
+            if (events.Any(@event => @event is IMadCamelColourSwitchedEvent))
+            {
+                Assert.That(events, Has.One.AssignableTo<IMadCamelColourSwitchedEvent>());
+                var switchColourEvent = events.GetEvent<IMadCamelColourSwitchedEvent>();
+                Assert.That(switchColourEvent.SwitchReason, Is.Not.EqualTo(MadCamelColourSwitchReason.UNDEFINED));
+                Assert.That(switchColourEvent.From, Is.Not.EqualTo(switchColourEvent.To));
+                CollectionAssert.Contains(ColourHelper.MadColours, switchColourEvent.From);
+                CollectionAssert.Contains(ColourHelper.MadColours, switchColourEvent.To);
+            }
+
             if (events.Any(@event => @event is IGameOverEvent))
             {
                 Assert.That(events, Has.One.AssignableTo<IEndOfTurnEvent>());
@@ -104,7 +114,7 @@ namespace TestCamelUpEngine.RealGame
                 Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
             }
 
-            var eventsWithSubEvents = events.Where(@event => @event is IActionSubEvents).ToList();
+            var eventsWithSubEvents = events.GetEvents<IActionSubEvents>().ToList();
             foreach (IActionSubEvents @event in eventsWithSubEvents)
             {
                 Assert.That(@event.Count, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(game.Players.Count), $"{nameof(IActionSubEvents)}.{nameof(@event.Count)}()");

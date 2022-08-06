@@ -1,9 +1,8 @@
-﻿#if DEBUG
-
+﻿using CamelUpEngine;
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.GameObjects;
 using CamelUpEngine.GameTools;
-using CamelUpEngine.Helpers.TestHelpers;
+using CamelUpEngine.Helpers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -13,12 +12,14 @@ namespace TestCamelUpEngine.GameTypingCardsManager
 {
     public class TypingCardsManagerCoinsCountTest
     {
-        private List<ICamel> camels = CamelHelper.GetCamels(Colour.Green, Colour.White, Colour.Red, Colour.Black, Colour.Blue, Colour.Yellow, Colour.Violet).ToList();
+        private List<Colour> camelsOrder = new() { Colour.Green, Colour.White, Colour.Red, Colour.Black, Colour.Blue, Colour.Yellow, Colour.Violet };
+        private List<ICamel> camels;
         private List<ITypingCard> typingCards = new();
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            camels = new Game(new[] { "One", "Two", "Three" }).Camels.GetMany(camelsOrder).ToList();
             TypingCardsManager manager = new(() => Guid.Empty);
 
             while (manager.AvailableCards.Any())
@@ -41,9 +42,9 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         {
             List<ITypingCard> cards = new List<ITypingCard>()
             {
-                typingCards.GetCard(Colour.Green, TypingCardValue.High),
-                typingCards.GetCard(Colour.Green, TypingCardValue.Medium),
-                typingCards.GetCard(Colour.Red, TypingCardValue.High)
+                typingCards.GetSingle(Colour.Green, TypingCardValue.High),
+                typingCards.GetSingle(Colour.Green, TypingCardValue.Medium),
+                typingCards.GetSingle(Colour.Red, TypingCardValue.High)
             };
 
             const int result = 5 + 3 + 1;
@@ -55,7 +56,7 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         {
             List<ITypingCard> cards = new List<ITypingCard>()
             {
-                typingCards.GetCard(Colour.Violet, TypingCardValue.High)
+                typingCards.GetSingle(Colour.Violet, TypingCardValue.High)
             };
 
             const int result = -1;
@@ -65,7 +66,7 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         [Test]
         public void TestGettingCoinsForAllCamels()
         {
-            List<ITypingCard> cards = camels.Where(camel => !camel.IsMad).Select(camel => typingCards.GetCard(camel.Colour, TypingCardValue.High)).ToList();
+            List<ITypingCard> cards = camels.Where(camel => !camel.IsMad).Select(camel => typingCards.GetSingle(camel.Colour, TypingCardValue.High)).ToList();
 
             const int result = 5 + 1 - 1 - 1 - 1;
             Assert.AreEqual(result, TypingCardsManager.CountCoins(camels, cards));
@@ -76,8 +77,8 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         {
             List<ITypingCard> cards = new List<ITypingCard>()
             {
-                typingCards.GetCard(Colour.Red, TypingCardValue.Medium),
-                typingCards.GetCard(Colour.Red, TypingCardValue.Low)
+                typingCards.GetSingle(Colour.Red, TypingCardValue.Medium),
+                typingCards.GetSingle(Colour.Red, TypingCardValue.Low)
             };
 
             const int result = 1 + 1;
@@ -89,8 +90,8 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         {
             List<ITypingCard> cards = new List<ITypingCard>()
             {
-                typingCards.GetCard(Colour.Blue, TypingCardValue.Low),
-                typingCards.GetCard(Colour.Blue, TypingCardValue.Low)
+                typingCards.GetSingle(Colour.Blue, TypingCardValue.Low),
+                typingCards.GetSingle(Colour.Blue, TypingCardValue.Low)
             };
 
             const int result = - 1 - 1;
@@ -100,17 +101,16 @@ namespace TestCamelUpEngine.GameTypingCardsManager
         [Test]
         public void TestGettingCoinsForFirstCamelAfterTwoMad()
         {
-            var camels = CamelHelper.GetCamels(Colour.White, Colour.Black, Colour.Yellow).ToList();
+            //var camels = CamelHelper.GetCamels(Colour.White, Colour.Black, Colour.Yellow).ToList();
+            var fewCamels = camels.GetMany(Colour.White, Colour.Black, Colour.Yellow);
 
             List<ITypingCard> cards = new List<ITypingCard>()
             {
-                typingCards.GetCard(Colour.Yellow, TypingCardValue.Medium)
+                typingCards.GetSingle(Colour.Yellow, TypingCardValue.Medium)
             };
 
             const int result = 3;
-            Assert.AreEqual(result, TypingCardsManager.CountCoins(camels, cards));
+            Assert.AreEqual(result, TypingCardsManager.CountCoins(fewCamels, cards));
         }
     }
 }
-
-#endif

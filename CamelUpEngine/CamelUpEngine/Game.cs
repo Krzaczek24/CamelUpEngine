@@ -30,7 +30,7 @@ namespace CamelUpEngine
         public IPlayer CurrentPlayer => currentPlayer;
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
-        public IReadOnlyCollection<ICamel> Camels => camelsManager.AllCamelsOrder;
+        public IReadOnlyCollection<ICamel> Camels => camelsManager.OrderedAllCamels;
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
@@ -156,7 +156,7 @@ namespace CamelUpEngine
                 if (returnedTypingCard.Any())
                 {
                     playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
-                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.AllCamelsOrder, player.TypingCards);
+                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.OrderedAllCamels, player.TypingCards);
                     if (earnedCoins != 0)
                     {
                         playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
@@ -171,8 +171,8 @@ namespace CamelUpEngine
 
         private void SummarizeBets()
         {
-            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(camelsManager.CamelsOrder.First(), winnerBetsStack);
-            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(camelsManager.CamelsOrder.Last(), loserBetsStack);
+            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.First(), winnerBetsStack);
+            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.Last(), loserBetsStack);
             ActionEventsCollector.AddEvent(new BetsSummaryEvent(winnerRewards, loserRewards));
         }
 
