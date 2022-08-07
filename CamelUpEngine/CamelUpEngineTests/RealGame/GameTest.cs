@@ -44,6 +44,7 @@ namespace TestCamelUpEngine.RealGame
                 availableActions.Add(TestPlacingAudienceTile);
             }
 
+            // TODO: włączyć to
             if (false)
             {
                 availableActions.Add(TestMakingBet);

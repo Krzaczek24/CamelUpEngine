@@ -41,7 +41,6 @@ namespace TestCamelUpEngine.Camels
             }
         }
 
-        // TODO: zweryfikować koleność wielbłądów na polach
         [Test, Sequential, Repeat(1000)]
         public void TestStackMove()
         {
@@ -59,45 +58,114 @@ namespace TestCamelUpEngine.Camels
             };
             // (A) B C D E X Y [+1]
             TestStackMove(camels['A'], 1, 2, 0, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new[] { camels['A'], camels['B'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new[] { camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new[] { camels['Y'] });
             //    A
             // _ (B) C D E X Y [+1]
             TestStackMove(camels['B'], 1, 3, 0, 3);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new[] { camels['A'], camels['B'], camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new[] { camels['Y'] });
             //      A
             //     (B)
             // _ _  C  D E X Y [+1]
             TestStackMove(camels['B'], 1, 4, 1, 3);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new[] { camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['A'], camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new[] { camels['Y'] });
             //         A
             //         B
             // _ _  C  D E X (Y) [-1]
             TestStackMove(camels['Y'], -1, 6, 0, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new[] { camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['A'], camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['Y'], camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //         A
             //         B    Y
             // _ _  C  D E (X) [-1]
             TestStackMove(camels['X'], -1, 6, 1, 1);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new[] { camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['A'], camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['Y'], camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //         A
             //         B Y  
             // _ _ (C) D E X [+2]
             TestStackMove(camels['C'], 2, 5, 0, 3);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['A'], camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['C'], camels['Y'], camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //       A C
             //       B Y  
             // _ _ _ D E (X) [-3]
             TestStackMove(camels['X'], -3, 6, 1, 1);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new[] { camels['C'], camels['Y'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['A'], camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //       (A)
             //   C    B
             // _ Y _  D E X [+1]
             TestStackMove(camels['A'], 1, 5, 2, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new[] { camels['C'], camels['Y'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['A'], camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //   C   B (A)
             // _ Y _ D  E X [+1]
             TestStackMove(camels['A'], 1, 6, 1, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new[] { camels['C'], camels['Y'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['A'], camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new Colour[] { });
             //   C   B   (A)
             // _ Y _ D  E X [+1]
             TestStackMove(camels['A'], 1, 7, 1, 1);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 1).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 2).Value, new[] { camels['C'], camels['Y'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 3).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 4).Value, new[] { camels['B'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 5).Value, new[] { camels['E'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 6).Value, new[] { camels['X'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 7).Value, new[] { camels['A'] });
             //   C   B
             // _ Y _ D E X A
         }
 
-        // TODO: zweryfikować koleność wielbłądów na polach
-        [Test, Sequential]
+        [Test, Sequential, Repeat(1000)]
         public void TestSteppingOnAudienceTile()
         {
             const int booingTileFieldIndex = 10;
@@ -106,7 +174,7 @@ namespace TestCamelUpEngine.Camels
             IAvailableField field = game.AudienceTileAvailableFields.Single(field => field.Index == booingTileFieldIndex);
             game.PlaceAudienceTile(field, AudienceTileSide.Booing);
 
-            Assert.Throws<FieldExpiredAvailabilityException>(() => game.PlaceAudienceTile(field, AudienceTileSide.Cheering));
+            //Assert.Throws<FieldExpiredAvailabilityException>(() => game.PlaceAudienceTile(field, AudienceTileSide.Cheering));
 
             field = game.AudienceTileAvailableFields.Single(field => field.Index == cheeringTileFieldIndex);
             game.PlaceAudienceTile(field, AudienceTileSide.Cheering);
@@ -129,31 +197,68 @@ namespace TestCamelUpEngine.Camels
             TestStackMove(camels['B'], 6, 8, 0, 2);
             TestStackMove(camels['C'], 6, 9, 0, 1);
             TestStackMove(camels['D'], 5, 9, 0, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new[] { camels['B'], camels['A'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['D'], camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
             // B (D)
             // A  C  - _ + [+1]
             TestStackMove(camels['D'], 1, 9, 2, 2);
-            // B  D
-            // A (C) - _ + [+1]
-            TestStackMove(camels['C'], 1, 9, 2, 2);
-            //  B  D
-            // (A) C - _ + [+2]
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new[] { camels['B'], camels['A'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['C'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            // B  C
+            // A (D) - _ + [+1]
+            TestStackMove(camels['D'], 1, 9, 2, 2);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new[] { camels['B'], camels['A'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['C'], camels['D'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            //  B  C
+            // (A) D - _ + [+2]
             TestStackMove(camels['A'], 2, 9, 0, 4);
-            //   (D)
-            //    C
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['C'], camels['D'], camels['B'], camels['A'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            //   (C)
+            //    D
             //    B
             // _  A - _ + [+1]
-            TestStackMove(camels['D'], 1, 9, 4, 4);
-            //    C
+            TestStackMove(camels['C'], 1, 9, 4, 4);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['D'], camels['B'], camels['A'], camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            //    D
             //   (B)
             //    A
-            // _  D - _ + [+3]
+            // _  C - _ + [+3]
             TestStackMove(camels['B'], 3, 13, 2, 2);
-            //    A        C
-            // _ (D) - _ + B [+3]
-            TestStackMove(camels['D'], 3, 13, 0, 4);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new[] { camels['A'], camels['C'] });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 13).Value, new[] { camels['D'], camels['B'] });
+            //    A        D
+            // _ (C) - _ + B [+3]
+            TestStackMove(camels['C'], 3, 13, 0, 4);
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 8).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 9).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 10).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 11).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 12).Value, new Colour[] { });
+            CollectionAssert.AreEqual(manager.Fields.ToDictionary(field => field.Index, field => field.Camels.Select(camel => camel.Colour)).Single(field => field.Key == 13).Value, new[] { camels['A'], camels['C'], camels['D'], camels['B'] });
             //           A
-            //           D
             //           C
+            //           D
             // _ _ - _ + B
         }
 
@@ -187,7 +292,7 @@ namespace TestCamelUpEngine.Camels
             Assert.AreEqual(camelInitialFieldIndex + fieldIndexShift, camelActualFieldIndex);
         }
 
-        [Test, Sequential]
+        [Test, Sequential, Repeat(1000)]
         public void TestMovingNth([Values(FIRST, MIDDLE, LAST)] int index)
         {
             MoveAllCamelsOnTheSameField(MEETUP_FIELD_INDEX);
