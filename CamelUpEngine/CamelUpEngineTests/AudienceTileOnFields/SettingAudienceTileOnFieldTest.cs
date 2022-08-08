@@ -6,6 +6,7 @@ using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameObjects.Available;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers.TestHelpers;
 using NUnit.Framework;

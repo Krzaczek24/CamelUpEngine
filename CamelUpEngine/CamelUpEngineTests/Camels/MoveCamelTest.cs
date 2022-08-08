@@ -5,6 +5,7 @@ using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameObjects.Available;
 using CamelUpEngine.GameTools;
 using CamelUpEngine.Helpers;
 using NUnit.Framework;

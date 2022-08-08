@@ -9,13 +9,15 @@ namespace CamelUpEngine.GameObjects
 
     internal class BetCard : IBetCard
     {
-        public Colour Colour { get; }
         public IPlayer Owner { get; }
+        public Colour Colour { get; }
 
-        public BetCard(Colour colour, IPlayer owner)
+        public BetCard(IPlayer owner, Colour colour)
         {
-            Colour = colour;
             Owner = owner;
+            Colour = colour;
         }
+
+        public override string ToString() => $"{Owner.Name}'s {Colour.ToString().ToLower()} bet card";
     }
 }

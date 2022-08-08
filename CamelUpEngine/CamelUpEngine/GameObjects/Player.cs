@@ -1,4 +1,4 @@
-﻿using CamelUpEngine.Helpers;
+﻿using CamelUpEngine.GameObjects.Available;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,23 +12,22 @@ namespace CamelUpEngine.GameObjects
         public string Name { get; }
         public int Coins { get; }
         public IReadOnlyCollection<ITypingCard> TypingCards { get; }
-        //internal IReadOnlyCollection<IBetCard> BetCards { get; }
+        public IReadOnlyCollection<IAvailableBetCard> AvailableBetCards { get; }
     }
 
     internal sealed class Player : IPlayer
     {
         public string Name { get; }
         public int Coins { get; private set; } = IPlayer.InitialCoinsCount;
-        public  IReadOnlyCollection<ITypingCard> TypingCards => typingCards;
-        internal IReadOnlyCollection<IBetCard> BetCards => betCards;
+        public IReadOnlyCollection<ITypingCard> TypingCards => typingCards;
+        public IReadOnlyCollection<IAvailableBetCard> AvailableBetCards => betCardsFunction(this);
 
         private readonly List<TypingCard> typingCards = new();
-        private readonly List<BetCard> betCards = new();
+        private Func<IPlayer, IReadOnlyCollection<IAvailableBetCard>> betCardsFunction = (IPlayer player) => null;
 
         public Player(string name)
         {
             Name = name;
-            betCards = ColourHelper.AllCardColours.Select(colour => new BetCard(colour, this)).ToList();
         }
 
         public int AddCoins(int count)
@@ -46,6 +45,8 @@ namespace CamelUpEngine.GameObjects
             typingCards.Clear();
             return typingCardsCopy;
         }
+
+        public void BindBetCardsFunction(Func<IPlayer, IReadOnlyCollection<IAvailableBetCard>> betCardsFunction) => this.betCardsFunction = betCardsFunction;
 
         public override string ToString() => $"Player '{Name}'";
     }

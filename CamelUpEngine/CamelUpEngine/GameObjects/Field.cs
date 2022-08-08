@@ -20,8 +20,7 @@ namespace CamelUpEngine.GameObjects
         public int Index { get; }
         public IAudienceTile AudienceTile { get; private set; }
         public IReadOnlyCollection<ICamel> Camels => camels;
-
-        private Field() { }
+        
         public Field(int number)
         {
             Index = number;

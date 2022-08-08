@@ -2,6 +2,7 @@
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameObjects.Available;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,8 +81,10 @@ namespace CamelUpEngine.GameTools
             targetField.PutAudienceTile(new AudienceTile(player, audienceTileSide));
             IAudienceTilePlacementEvent placementEvent = new AudienceTilePlacementEvent(targetField.Index, targetField.AudienceTile);
 
-            DrawGuid = GenerateGuid();
+            RegenerateGuid();
             return placementEvent;
         }
+
+        public void RegenerateGuid() => DrawGuid = GenerateGuid();
     }
 }

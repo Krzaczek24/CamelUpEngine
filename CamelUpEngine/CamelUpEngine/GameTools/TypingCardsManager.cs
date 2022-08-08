@@ -1,6 +1,7 @@
 ﻿using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameObjects.Available;
 using CamelUpEngine.Helpers;
 using System;
 using System.Collections.Generic;
@@ -42,8 +43,7 @@ namespace CamelUpEngine.GameTools
                 }
             }
 
-            availableCardsCache = null;
-            DrawGuid = GenerateGuid();
+            RegenerateGuid();
         }
 
         public ITypingCard DrawCard(IAvailableTypingCard availableTypingCard)
@@ -57,8 +57,7 @@ namespace CamelUpEngine.GameTools
             && stack.TryPeek(out TypingCard card)
             && card.Value == availableTypingCard.Value)
             {
-                availableCardsCache = null;
-                DrawGuid = GenerateGuid();
+                RegenerateGuid();
                 return stack.Pop();
             }
 
@@ -82,6 +81,12 @@ namespace CamelUpEngine.GameTools
             }
 
             return playerCoinsEarned;
+        }
+
+        public void RegenerateGuid()
+        {
+            availableCardsCache = null;
+            DrawGuid = GenerateGuid();
         }
     }
 }

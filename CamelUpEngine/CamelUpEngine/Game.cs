@@ -3,6 +3,7 @@ using CamelUpEngine.Core.Actions.Events;
 using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Exceptions;
 using CamelUpEngine.GameObjects;
+using CamelUpEngine.GameObjects.Available;
 using CamelUpEngine.GameTools;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,10 @@ namespace CamelUpEngine
         private readonly List<Player> players;
         private readonly List<Field> fields;
         private readonly Dicer dicer;
+        private readonly BetCardsManager betManager;
         private readonly TypingCardsManager cardManager;
         private readonly CamelTrafficManager camelsManager;
         private readonly AudienceTilesManager tilesManager;
-        private readonly Stack<BetCard> winnerBetsStack;
-        private readonly Stack<BetCard> loserBetsStack;
 
         public ActionEvents History => ActionEventsCollector.GetGameEvents();
         public IPlayer CurrentPlayer => currentPlayer;
@@ -33,9 +33,10 @@ namespace CamelUpEngine
         public IReadOnlyCollection<ICamel> Camels => camelsManager.OrderedAllCamels;
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
+        public IReadOnlyCollection<IAvailableBetCard> AvailableBetCards => betManager.GetPlayerAvailableBetCards(CurrentPlayer);
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
-        public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? winnerBetsStack : null;
-        public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? loserBetsStack : null;
+        public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? betManager.WinnerBetsStack : null;
+        public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? betManager.LoserBetsStack : null;
 
         public bool GameIsOver => camelsManager.AnyCamelPassFinishLine;
         private bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
@@ -43,15 +44,14 @@ namespace CamelUpEngine
         public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
         {
             ActionEventsCollector.Reset();
-            players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();            
             fields = GameInitializer.GenerateFields(fieldsCount).ToList();
+            players = GameInitializer.GeneratePlayers(playerNames, randomizePlayersOrder).ToList();
             GameInitializer.SetCamelsOnBoard(this);
             dicer = new();
+            betManager = new(players);
             cardManager = new();
             tilesManager = new(fields);
             camelsManager = new(fields);
-            loserBetsStack = new();
-            winnerBetsStack = new();
             currentPlayer = players.First();
         }
 
@@ -83,15 +83,14 @@ namespace CamelUpEngine
             return ActionEventsCollector.GetActionEvents();
         }
 
-        public ActionEvents MakeBet(Colour colour, BetType betType)
+        public ActionEvents MakeBet(IAvailableBetCard availableBetCard, BetType betType)
         {
             if (GameIsOver)
             {
                 throw new GameOverException();
             }
 
-            // TODO: zabranie karty graczowi
-            // TODO: położenie karty na odpowiednim stosie
+            ActionEventsCollector.AddEvent(betManager.MakeBet(CurrentPlayer, availableBetCard, betType));
 
             SetNextPlayerAsCurrent();
 
@@ -171,8 +170,8 @@ namespace CamelUpEngine
 
         private void SummarizeBets()
         {
-            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.First(), winnerBetsStack);
-            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.Last(), loserBetsStack);
+            IList<ICoinsAddedEvent> winnerRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.First(), betManager.WinnerBetsStack);
+            IList<ICoinsAddedEvent> loserRewards = SummarizeSingleStackBets(camelsManager.OrderedCamels.Last(), betManager.LoserBetsStack);
             ActionEventsCollector.AddEvent(new BetsSummaryEvent(winnerRewards, loserRewards));
         }
 
@@ -210,6 +209,10 @@ namespace CamelUpEngine
 
         private void SetNextPlayerAsCurrent()
         {
+            betManager.RegenerateGuid();
+            cardManager.RegenerateGuid();
+            tilesManager.RegenerateGuid();
+
             int currentIndex = players.ToList().IndexOf(currentPlayer);
             int playersCount = players.Count;
             ActionEventsCollector.AddEvent(new ChangedCurrentPlayerEvent(currentPlayer, currentPlayer = players.ElementAt(++currentIndex % playersCount)));

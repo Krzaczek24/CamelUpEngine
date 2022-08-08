@@ -27,6 +27,7 @@ namespace TestCamelUpEngine.RealGame
                     GetAvailableActions().GetRandom()();
                 }
             });
+
             Assert.IsTrue(game.GameIsOver);
         }
 
@@ -44,8 +45,7 @@ namespace TestCamelUpEngine.RealGame
                 availableActions.Add(TestPlacingAudienceTile);
             }
 
-            // TODO: włączyć to
-            if (false)
+            if (game.AvailableBetCards.Any())
             {
                 availableActions.Add(TestMakingBet);
             }
@@ -206,13 +206,20 @@ namespace TestCamelUpEngine.RealGame
 
         private ActionEvents TestMakingBet()
         {
-            // TODO: TestMakingBet
-            ActionEvents events = game.MakeBet(ColourHelper.AllCamelColours.GetRandom(), Enum.GetValues<BetType>().GetRandom());
+            var player = game.CurrentPlayer;
+            ActionEvents events = game.MakeBet(game.AvailableBetCards.GetRandom(), Enum.GetValues<BetType>().GetRandom());
 
             CollectionAssert.AllItemsAreNotNull(events);
             CollectionAssert.AllItemsAreUnique(events);
 
+            Assert.That(events, Has.One.AssignableTo<IBettingEvent>());
+            var @event = events.GetEvent<IBettingEvent>();
+            Assert.AreEqual(player, @event.BetCard.Owner);
+
             Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            var allBets = game.History.GetEvents<IBettingEvent>().Select(e => $"{e.BetCard.Owner.Name}|{e.BetCard.Colour}").ToList();
+            CollectionAssert.AllItemsAreUnique(allBets);
 
             return events;
         }

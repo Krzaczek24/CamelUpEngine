@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace CamelUpEngine.GameObjects
+namespace CamelUpEngine.GameObjects.Available
 {
-    public interface IAvailableField
+    public interface IAvailableField : IAvailable
     {
         public int Index { get; }
-        internal Guid DrawGuid { get; }
     }
 
     internal sealed class AvailableField : IAvailableField
