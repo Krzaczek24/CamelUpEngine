@@ -39,6 +39,15 @@ namespace CamelUpEngine.Extensions
         public static T GetRandom<T>(this IEnumerable<T> source) => source.Any() ? source.ElementAt(new Random().Next(source.Count())) : default(T);
 
         /// <summary>
+        /// Return n random elements from a sequence
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetRandom<T>(this IEnumerable<T> source, int count) => source.OrderBy(x => Guid.NewGuid()).Take(count).ToList();
+
+        /// <summary>
         /// Returns elements from a sequence as strings
         /// </summary>
         /// <typeparam name="T"></typeparam>
