@@ -11,7 +11,7 @@ namespace CamelUpEngine.GameTools
 {
     internal static class GameInitializer
     {
-        private static bool IsInvalidPlayerName(string playerName) => !Regex.IsMatch(playerName, @"^\w+(\s?\w+)+$");
+        public static bool IsInvalidPlayerName(string playerName) => !Regex.IsMatch(playerName, @"^\w{3,}$");
         public static IEnumerable<Player> GeneratePlayers(IEnumerable<string> playerNames, bool randomizePlayersOrder)
         {
             int playersCount = playerNames?.Count() ?? 0;

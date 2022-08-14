@@ -55,6 +55,8 @@ namespace CamelUpEngine
             currentPlayer = players.First();
         }
 
+        public static bool IsPlayerNameValid(string playerName) => !GameInitializer.IsInvalidPlayerName(playerName);
+
         public ActionEvents DrawDice()
         {
             if (GameIsOver)
