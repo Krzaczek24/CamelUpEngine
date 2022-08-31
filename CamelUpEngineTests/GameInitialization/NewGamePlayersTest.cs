@@ -44,6 +44,6 @@ namespace TestCamelUpEngine.GameInitialization
         public void TestInvalidPlayerName([Values("_", "A", "A ", "ABC%")] string playerName) => Assert.Throws<InvalidPlayerNameException>(() => new Game(new[] { "One", "Two", playerName }));
 
         [Test]
-        public void TestValidPlayerName() => Assert.DoesNotThrow(() => new Game(new[] { "Test_One", "T3st TW0", "__", "XD" }));
+        public void TestValidPlayerName() => Assert.DoesNotThrow(() => new Game(new[] { "Test_One", "T3stTW0", "XDxd" }));
     }
 }

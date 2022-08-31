@@ -5,6 +5,7 @@ using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.Helpers;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,11 @@ namespace TestCamelUpEngine.RealGame
 
         private IReadOnlyCollection<Func<ActionEvents>> GetAvailableActions()
         {
+            if (game.TurnIsOver)
+            {
+                return new List<Func<ActionEvents>>() { TestGoingToNewTurn };
+            }
+
             List<Func<ActionEvents>> availableActions = new() { TestDrawingDice };
 
             if (game.AvailableTypingCards.Any())
@@ -99,42 +105,10 @@ namespace TestCamelUpEngine.RealGame
             else if (events.Any(@event => @event is IEndOfTurnEvent))
             {
                 Assert.That(events, Has.One.AssignableTo<IEndOfTurnEvent>());
-                Assert.That(events, Has.One.AssignableTo<IAllAudienceTilesRemovementEvent>());
-                Assert.That(events, Has.One.AssignableTo<IDicerRefilledEvent>());
-                Assert.That(events, Has.One.AssignableTo<ICoinsCountingEvent>());
-                Assert.That(events, Has.One.AssignableTo<IAllTypingCardsReturnedEvent>());
-                Assert.That(events, Has.One.AssignableTo<INewTurnEvent>());
-                Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
-                
-                Assert.That(game.Fields.Select(field => field.AudienceTile), Has.All.Null);
-                Assert.That(game.DrawnDices, Is.Empty);
-                Assert.That(game.Players.Select(player => player.TypingCards), Has.All.Empty);
             }
             else
             {
                 Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
-            }
-
-            var eventsWithSubEvents = events.GetEvents<IActionSubEvents>().ToList();
-            foreach (IActionSubEvents @event in eventsWithSubEvents)
-            {
-                Assert.That(@event.Count, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(game.Players.Count), $"{nameof(IActionSubEvents)}.{nameof(@event.Count)}()");
-
-                Type genericType = @event.GetType().GetInterfaces().Single(i => i.IsGenericType).GenericTypeArguments.First();
-                switch (genericType.Name)
-                {
-                    case nameof(IAudienceTileRemovementEvent):
-                        Assert.That((@event as IAllAudienceTilesRemovementEvent).SubEvents, Has.All.Matches<IAudienceTileRemovementEvent>(e => e.FieldIndex >= 1 && e.FieldIndex <= game.Fields.Count && e.AudienceTile != null));
-                        break;
-                    case nameof(ICoinsAddedEvent):
-                        Assert.That((@event as ICoinsCountingEvent).SubEvents, Has.All.Matches<ICoinsAddedEvent>(e => e.CoinsCount != 0 && e.Player.Coins >= 0));
-                        break;
-                    case nameof(IPlayerTypingCardsReturnedEvent):
-                        Assert.That((@event as IAllTypingCardsReturnedEvent).SubEvents, Has.All.Matches<IPlayerTypingCardsReturnedEvent>(e => e.TypingCards.Count > 0 && e.Player.TypingCards.Count == 0));
-                        break;
-                    default:
-                        throw new NotImplementedException($"Not implemented type {genericType.Name}");
-                }
             }
 
             var camelsInGame = game.Fields.SelectMany(field => field.Camels).ToList();
@@ -220,6 +194,46 @@ namespace TestCamelUpEngine.RealGame
 
             var allBets = game.History.GetEvents<IBettingEvent>().Select(e => $"{e.BetCard.Owner.Name}|{e.BetCard.Colour}").ToList();
             CollectionAssert.AllItemsAreUnique(allBets);
+
+            return events;
+        }
+
+        private ActionEvents TestGoingToNewTurn()
+        {
+            ActionEvents events = game.GoToNextTurn();
+
+            Assert.That(events, Has.One.AssignableTo<IAllAudienceTilesRemovementEvent>());
+            Assert.That(events, Has.One.AssignableTo<IDicerRefilledEvent>());
+            Assert.That(events, Has.One.AssignableTo<ICoinsCountingEvent>());
+            Assert.That(events, Has.One.AssignableTo<IAllTypingCardsReturnedEvent>());
+            Assert.That(events, Has.One.AssignableTo<INewTurnEvent>());
+            Assert.That(events, Has.One.AssignableTo<IChangedCurrentPlayerEvent>());
+
+            Assert.That(game.Fields.Select(field => field.AudienceTile), Has.All.Null);
+            Assert.That(game.DrawnDices, Is.Empty);
+            Assert.That(game.Players.Select(player => player.TypingCards), Has.All.Empty);
+
+            var eventsWithSubEvents = events.GetEvents<IActionSubEvents>().ToList();
+            foreach (IActionSubEvents @event in eventsWithSubEvents)
+            {
+                Assert.That(@event.Count, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(game.Players.Count), $"{nameof(IActionSubEvents)}.{nameof(@event.Count)}()");
+
+                Type genericType = @event.GetType().GetInterfaces().Single(i => i.IsGenericType).GenericTypeArguments.First();
+                switch (genericType.Name)
+                {
+                    case nameof(IAudienceTileRemovementEvent):
+                        Assert.That((@event as IAllAudienceTilesRemovementEvent).SubEvents, Has.All.Matches<IAudienceTileRemovementEvent>(e => e.FieldIndex >= 1 && e.FieldIndex <= game.Fields.Count && e.AudienceTile != null));
+                        break;
+                    case nameof(ICoinsAddedEvent):
+                        Assert.That((@event as ICoinsCountingEvent).SubEvents, Has.All.Matches<ICoinsAddedEvent>(e => e.CoinsCount != 0 && e.Player.Coins >= 0));
+                        break;
+                    case nameof(IPlayerTypingCardsReturnedEvent):
+                        Assert.That((@event as IAllTypingCardsReturnedEvent).SubEvents, Has.All.Matches<IPlayerTypingCardsReturnedEvent>(e => e.TypingCards.Count > 0 && e.Player.TypingCards.Count == 0));
+                        break;
+                    default:
+                        throw new NotImplementedException($"Not implemented type {genericType.Name}");
+                }
+            }
 
             return events;
         }

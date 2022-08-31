@@ -22,7 +22,12 @@ namespace TestCamelUpEngine.Players
                 expectedPlayerName = playersList[i % playersList.Count];
                 Assert.AreEqual(expectedPlayerName, newPlayerName);
                 Assert.AreEqual(expectedPlayerName, game.CurrentPlayer.Name);
-                var changedPlayerEvent = game.DrawDice().Single(@event => @event is IChangedCurrentPlayerEvent) as IChangedCurrentPlayerEvent;
+                var changedPlayerEvent = game.DrawDice().SingleOrDefault(@event => @event is IChangedCurrentPlayerEvent) as IChangedCurrentPlayerEvent;
+                if (changedPlayerEvent == null)
+                {
+                    Assert.IsTrue(game.TurnIsOver);
+                    changedPlayerEvent = game.GoToNextTurn().Single(@event => @event is IChangedCurrentPlayerEvent) as IChangedCurrentPlayerEvent;
+                }
                 Assert.AreEqual(expectedPlayerName, changedPlayerEvent.PreviousPlayer.Name);
                 newPlayerName = changedPlayerEvent.NewPlayer.Name;
             }

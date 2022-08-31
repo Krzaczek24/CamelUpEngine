@@ -39,7 +39,7 @@ namespace CamelUpEngine
         public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? betManager.LoserBetsStack : null;
 
         public bool GameIsOver => camelsManager.AnyCamelPassFinishLine;
-        private bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
+        public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;
 
         public Game(IEnumerable<string> playerNames, bool randomizePlayersOrder = false, int fieldsCount = DefaultFieldsCount)
         {
@@ -64,6 +64,11 @@ namespace CamelUpEngine
                 throw new GameOverException();
             }
 
+            if (TurnIsOver)
+            {
+                throw new TurnIsOverException();
+            }
+
             IDrawnDice drawnDice = dicer.DrawDice();
             ActionEventsCollector.AddEvent(new DiceDrawnEvent(drawnDice));
             ActionEventsCollector.AddEvent(new CoinsAddedEvent(currentPlayer, currentPlayer.AddCoins(1)));
@@ -77,10 +82,12 @@ namespace CamelUpEngine
 
             if (TurnIsOver)
             {
-                GoToNextTurn();
+                ActionEventsCollector.AddEvent(new EndOfTurnEvent());
             }
-
-            SetNextPlayerAsCurrent();
+            else
+            {
+                SetNextPlayer();
+            }
 
             return ActionEventsCollector.GetActionEvents();
         }
@@ -92,20 +99,35 @@ namespace CamelUpEngine
                 throw new GameOverException();
             }
 
+            if (TurnIsOver)
+            {
+                throw new TurnIsOverException();
+            }
+
             ActionEventsCollector.AddEvent(betManager.MakeBet(CurrentPlayer, availableBetCard, betType));
 
-            SetNextPlayerAsCurrent();
+            SetNextPlayer();
 
             return ActionEventsCollector.GetActionEvents();
         }
 
         public ActionEvents DrawTypingCard(IAvailableTypingCard card)
         {
+            if (GameIsOver)
+            {
+                throw new GameOverException();
+            }
+
+            if (TurnIsOver)
+            {
+                throw new TurnIsOverException();
+            }
+
             TypingCard typingCard = (TypingCard)cardManager.DrawCard(card);
             currentPlayer.AddTypingCard(typingCard);
             ActionEventsCollector.AddEvent(new TypingCardDrawnEvent(currentPlayer, typingCard));
 
-            SetNextPlayerAsCurrent();
+            SetNextPlayer();
 
             return ActionEventsCollector.GetActionEvents();
         }
@@ -117,6 +139,11 @@ namespace CamelUpEngine
                 throw new GameOverException();
             }
 
+            if (TurnIsOver)
+            {
+                throw new TurnIsOverException();
+            }
+
             var placementAudienceTileEvent = tilesManager.PlaceAudienceTile(currentPlayer, availableField, audienceTileSide, out var removementAudienceTileEvent);
             if (removementAudienceTileEvent != null)
             {
@@ -124,7 +151,30 @@ namespace CamelUpEngine
             }
             ActionEventsCollector.AddEvent(placementAudienceTileEvent);
 
-            SetNextPlayerAsCurrent();
+            SetNextPlayer();
+
+            return ActionEventsCollector.GetActionEvents();
+        }
+
+        public ActionEvents GoToNextTurn()
+        {
+            if (GameIsOver)
+            {
+                throw new GameOverException();
+            }
+
+            if (!TurnIsOver)
+            {
+                throw new TurnIsNotOverException();
+            }
+
+            RemoveAllAudienceTiles();
+            RefillDicer();
+            SummarizeCurrentTurn();
+
+            ActionEventsCollector.AddEvent(new NewTurnEvent());
+
+            SetNextPlayer();
 
             return ActionEventsCollector.GetActionEvents();
         }
@@ -135,15 +185,6 @@ namespace CamelUpEngine
             SummarizeCurrentTurn();
             SummarizeBets();
             ActionEventsCollector.AddEvent(new GameOverEvent(this));
-        }
-
-        private void GoToNextTurn()
-        {
-            ActionEventsCollector.AddEvent(new EndOfTurnEvent());
-            RemoveAllAudienceTiles();
-            RefillDicer();
-            SummarizeCurrentTurn();
-            ActionEventsCollector.AddEvent(new NewTurnEvent());
         }
 
         private void SummarizeCurrentTurn()
@@ -209,7 +250,7 @@ namespace CamelUpEngine
             ActionEventsCollector.AddEvent(new AllAudienceTilesRemovementEvent(audienceTileRemovementEvents));
         }
 
-        private void SetNextPlayerAsCurrent()
+        private void SetNextPlayer()
         {
             betManager.RegenerateGuid();
             cardManager.RegenerateGuid();
