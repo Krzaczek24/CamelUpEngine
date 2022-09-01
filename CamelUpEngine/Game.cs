@@ -37,6 +37,7 @@ namespace CamelUpEngine
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
         public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? betManager.WinnerBetsStack : null;
         public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? betManager.LoserBetsStack : null;
+        public IReadOnlyDictionary<Colour, IReadOnlyCollection<ITypingCard>> RemainingTypingCards => cardManager.RemainingCards;
 
         public bool GameIsOver => camelsManager.AnyCamelPassFinishLine;
         public bool TurnIsOver => dicer.DrawnDices.Count() >= MaximalDrawnDices;

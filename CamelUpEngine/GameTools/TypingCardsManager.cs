@@ -20,6 +20,9 @@ namespace CamelUpEngine.GameTools
         private IReadOnlyCollection<IAvailableTypingCard> availableCardsCache;
         public IReadOnlyCollection<IAvailableTypingCard> AvailableCards => availableCardsCache ??= availableCards.Select(stack => stack.Value.TryPeek(out TypingCard card) ? new AvailableTypingCard(card, DrawGuid) : null).Where(card => card != null).ToList();
 
+        private IReadOnlyDictionary<Colour, IReadOnlyCollection<ITypingCard>> remainingCardsCache;
+        public IReadOnlyDictionary<Colour, IReadOnlyCollection<ITypingCard>> RemainingCards => remainingCardsCache ??= availableCards.ToDictionary(x => x.Key, x => (IReadOnlyCollection<ITypingCard>)x.Value.ToList());
+
         public TypingCardsManager(Func<Guid> guidGenerationFunction = null)
         {
             GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;
@@ -86,6 +89,7 @@ namespace CamelUpEngine.GameTools
         public void RegenerateGuid()
         {
             availableCardsCache = null;
+            remainingCardsCache = null;
             DrawGuid = GenerateGuid();
         }
     }
