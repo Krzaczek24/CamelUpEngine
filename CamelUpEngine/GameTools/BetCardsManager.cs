@@ -22,6 +22,9 @@ namespace CamelUpEngine.GameTools
         public IReadOnlyCollection<IBetCard> WinnerBetsStack => winnerBetsStack;
         public IReadOnlyCollection<IBetCard> LoserBetsStack => loserBetsStack;
 
+        public IReadOnlyCollection<IBetCard> MaskedWinnerBetsStack => winnerBetsStack.Select(bet => new BetCard(bet.Owner, Colour.Mad)).ToList();
+        public IReadOnlyCollection<IBetCard> MaskedLoserBetsStack => loserBetsStack.Select(bet => new BetCard(bet.Owner, Colour.Mad)).ToList();
+
         public BetCardsManager(IEnumerable<IPlayer> players, Func<Guid> guidGenerationFunction = null)
         {
             GenerateGuid = guidGenerationFunction ?? Guid.NewGuid;

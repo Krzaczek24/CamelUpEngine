@@ -35,8 +35,8 @@ namespace CamelUpEngine
         public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IAvailableBetCard> AvailableBetCards => betManager.GetPlayerAvailableBetCards(CurrentPlayer);
         public IReadOnlyCollection<IAvailableTypingCard> AvailableTypingCards => cardManager.AvailableCards;
-        public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? betManager.WinnerBetsStack : null;
-        public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? betManager.LoserBetsStack : null;
+        public IReadOnlyCollection<IBetCard> WinnerBets => GameIsOver ? betManager.WinnerBetsStack : betManager.MaskedWinnerBetsStack;
+        public IReadOnlyCollection<IBetCard> LoserBets => GameIsOver ? betManager.LoserBetsStack : betManager.MaskedLoserBetsStack;
         public IReadOnlyDictionary<Colour, IReadOnlyCollection<ITypingCard>> RemainingTypingCards => cardManager.RemainingCards;
 
         public bool GameIsOver => camelsManager.AnyCamelPassFinishLine;
