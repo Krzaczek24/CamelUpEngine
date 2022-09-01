@@ -225,7 +225,7 @@ namespace TestCamelUpEngine.RealGame
                         Assert.That((@event as IAllAudienceTilesRemovementEvent).SubEvents, Has.All.Matches<IAudienceTileRemovementEvent>(e => e.FieldIndex >= 1 && e.FieldIndex <= game.Fields.Count && e.AudienceTile != null));
                         break;
                     case nameof(ICoinsAddedEvent):
-                        Assert.That((@event as ICoinsCountingEvent).SubEvents, Has.All.Matches<ICoinsAddedEvent>(e => e.CoinsCount != 0 && e.Player.Coins >= 0));
+                        Assert.That((@event as ICoinsCountingEvent).SubEvents, Has.All.Matches<ICoinsAddedEvent>(e => e.Player.Coins >= 0));
                         break;
                     case nameof(IPlayerTypingCardsReturnedEvent):
                         Assert.That((@event as IAllTypingCardsReturnedEvent).SubEvents, Has.All.Matches<IPlayerTypingCardsReturnedEvent>(e => e.TypingCards.Count > 0 && e.Player.TypingCards.Count == 0));

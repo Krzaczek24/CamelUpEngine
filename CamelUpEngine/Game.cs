@@ -199,7 +199,7 @@ namespace CamelUpEngine
                 if (returnedTypingCard.Any())
                 {
                     playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
-                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.OrderedAllCamels, player.TypingCards);
+                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.OrderedAllCamels, returnedTypingCard);
                     if (earnedCoins != 0)
                     {
                         playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
