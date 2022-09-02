@@ -5,7 +5,6 @@ using CamelUpEngine.Core.Enums;
 using CamelUpEngine.Extensions;
 using CamelUpEngine.Helpers;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Execution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
