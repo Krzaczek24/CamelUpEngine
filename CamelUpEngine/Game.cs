@@ -30,7 +30,7 @@ namespace CamelUpEngine
         public IPlayer CurrentPlayer => currentPlayer;
         public IReadOnlyCollection<IPlayer> Players => players.ToList();
         public IReadOnlyCollection<IField> Fields => fields.ToList();
-        public IReadOnlyCollection<ICamel> Camels => camelsManager.OrderedAllCamels;
+        public IReadOnlyCollection<ICamel> Camels => GameIsOver ? camelsManager.OrderedCamels : camelsManager.OrderedAllCamels;
         public IReadOnlyCollection<IDrawnDice> DrawnDices => dicer.DrawnDices;
         public IReadOnlyCollection<IAvailableField> AudienceTileAvailableFields => tilesManager.GetAudienceTileAvailableFields();
         public IReadOnlyCollection<IAvailableBetCard> AvailableBetCards => betManager.GetPlayerAvailableBetCards(CurrentPlayer);
