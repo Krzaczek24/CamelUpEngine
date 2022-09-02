@@ -71,12 +71,12 @@ namespace TestCamelUpEngine.RealGame
             {
                 Assert.That(events, Has.One.AssignableTo<ICamelsStoodOnAudienceTileEvent>());
                 Assert.That(events, Has.Exactly(2).AssignableTo<ICoinsAddedEvent>());
-                Assert.That(events, Has.Exactly(2).AssignableTo<ICamelMovedEvent>());
+                Assert.That(events, Has.Exactly(2).AssignableTo<ICamelsMovedEvent>());
             }
             else
             {
                 Assert.That(events, Has.One.AssignableTo<ICoinsAddedEvent>());
-                Assert.That(events, Has.One.AssignableTo<ICamelMovedEvent>());
+                Assert.That(events, Has.One.AssignableTo<ICamelsMovedEvent>());
             }
 
             if (events.Any(@event => @event is IMadCamelColourSwitchedEvent))

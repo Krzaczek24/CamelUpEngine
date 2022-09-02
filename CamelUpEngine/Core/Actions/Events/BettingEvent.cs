@@ -5,17 +5,20 @@ namespace CamelUpEngine.Core.Actions.Events
 {
     public interface IBettingEvent : IActionEvent
     {
+        public IPlayer Player { get; }
         public IBetCard BetCard { get; }
         public BetType BetType { get; }
     }
 
     internal class BettingEvent : IBettingEvent
     {
+        public IPlayer Player { get; }
         public IBetCard BetCard { get; }
         public BetType BetType { get; }
 
-        public BettingEvent(IBetCard betCard, BetType betType)
+        public BettingEvent(IPlayer player, IBetCard betCard, BetType betType)
         {
+            Player = player;
             BetCard = betCard;
             BetType = betType;
         }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface ICamelMovedEvent : IActionEvent
+    public interface ICamelsMovedEvent : IActionEvent
     {
         public IReadOnlyCollection<ICamel> Camels { get; }
         public int FromFieldIndex { get; }
@@ -12,7 +12,7 @@ namespace CamelUpEngine.Core.Actions.Events
         public StackPutType PutType { get; }
     }
 
-    internal class CamelsMovedEvent : ICamelMovedEvent
+    internal class CamelsMovedEvent : ICamelsMovedEvent
     {
         public IReadOnlyCollection<ICamel> Camels { get; }
         public int FromFieldIndex { get; }

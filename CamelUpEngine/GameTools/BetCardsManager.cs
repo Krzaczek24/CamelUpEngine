@@ -58,7 +58,7 @@ namespace CamelUpEngine.GameTools
             playersBetCard[player].Remove(betCard);
 
             RegenerateGuid();
-            return new BettingEvent(betCard, betType);
+            return new BettingEvent(player, betCard, betType);
         }
 
         internal IReadOnlyCollection<IAvailableBetCard> GetPlayerAvailableBetCards(IPlayer player) => playersBetCard[player].Select(card => new AvailableBetCard(card.Colour, DrawGuid)).ToList();
