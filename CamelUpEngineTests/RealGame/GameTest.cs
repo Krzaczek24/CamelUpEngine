@@ -113,8 +113,11 @@ namespace TestCamelUpEngine.RealGame
             var camelsInGame = game.Fields.SelectMany(field => field.Camels).ToList();
             CollectionAssert.AllItemsAreNotNull(camelsInGame);
             CollectionAssert.AllItemsAreUnique(camelsInGame);
-            CollectionAssert.AreEquivalent(game.Camels, camelsInGame);
-            CollectionAssert.IsSubsetOf(camelsInGame, game.Camels);
+            if (!game.GameIsOver)
+            {
+                CollectionAssert.AreEquivalent(game.Camels, camelsInGame);
+                CollectionAssert.IsSubsetOf(camelsInGame, game.Camels);
+            }
 
             return events;
         }
