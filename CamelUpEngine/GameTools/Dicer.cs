@@ -38,7 +38,7 @@ namespace CamelUpEngine.GameTools
 
         public static IReadOnlyCollection<IDrawnDice> DrawDicesForInitialCamelsPlacement()
         {
-            return ColourHelper.AllCamelColours.Select(colour => new DrawnDice(new Dice(colour))).ToList();
+            return ColourHelper.AllCamelColours.Select(colour => new Dice(colour).Draw()).ToList();
         }
     }
 }

@@ -36,11 +36,7 @@ namespace CamelUpEngine.GameObjects
         public DrawnDice(Dice dice)
         {
             Colour = ConvertColour(dice.Colour);
-            Value = new Random().Next(2) + 1;
-            if (ColourHelper.IsMadColour(Colour))
-            {
-                Value = -Value;
-            }            
+            Value = new Random().Next(3) + 1;         
         }
 
         private Colour ConvertColour(Colour colour)

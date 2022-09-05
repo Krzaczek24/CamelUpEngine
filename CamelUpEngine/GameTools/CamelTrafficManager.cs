@@ -41,11 +41,15 @@ namespace CamelUpEngine.GameTools
             List<IActionEvent> events = new();
 
             bool isMadColour = ColourHelper.IsMadColour(colour);
-            if (isMadColour && ShouldSwitchMadColour(colour, out MadCamelColourSwitchReason madCamelColourSwitchReason))
+            if (isMadColour)
             {
-                Colour originalColour = colour;
-                colour = ColourHelper.GetOppositeMadColour(colour);
-                events.Add(new MadCamelColourSwitchedEvent(originalColour, colour, madCamelColourSwitchReason));
+                value = -value;
+                if (ShouldSwitchMadColour(colour, out MadCamelColourSwitchReason madCamelColourSwitchReason))
+                {
+                    Colour originalColour = colour;
+                    colour = ColourHelper.GetOppositeMadColour(colour);
+                    events.Add(new MadCamelColourSwitchedEvent(originalColour, colour, madCamelColourSwitchReason));
+                }
             }
 
             // camel move
@@ -67,8 +71,9 @@ namespace CamelUpEngine.GameTools
             {
                 events.Add(new CamelsStoodOnAudienceTileEvent(audienceTile));
                 events.Add(new CoinsAddedEvent(audienceTile.Owner, ((Player)audienceTile.Owner).AddCoins(1)));
-                newFieldIndex = field.Index + audienceTile.MoveValue;
-                events.Add(new CamelsMovedEvent(camels, field.Index, newFieldIndex, audienceTile.Side.ToStackPutType()));
+                newFieldIndex = field.Index + (ColourHelper.IsMadColour(colour) ? -audienceTile.MoveValue : audienceTile.MoveValue);
+                int prettyNewFieldIndex = ((newFieldIndex + fields.Count - 1) % fields.Count) + 1;
+                events.Add(new CamelsMovedEvent(camels, field.Index, prettyNewFieldIndex, audienceTile.Side.ToStackPutType()));
                 if (DoesCamelGoThroughFinishLine(newFieldIndex))
                 {
                     PerformEndingCamelMove(camels, newFieldIndex);

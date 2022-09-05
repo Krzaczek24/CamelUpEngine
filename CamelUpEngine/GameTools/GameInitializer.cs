@@ -83,7 +83,7 @@ namespace CamelUpEngine.GameTools
         {
             if (ColourHelper.IsMadColour(camelColour))
             {
-                position = game.Fields.Count + position + 1;
+                position = game.Fields.Count - position + 1;
             }
 
             Camel camel = camels.Single(camel => camel.Colour == camelColour) as Camel;
