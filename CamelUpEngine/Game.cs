@@ -84,6 +84,7 @@ namespace CamelUpEngine
             if (TurnIsOver)
             {
                 ActionEventsCollector.AddEvent(new EndOfTurnEvent());
+                SummarizeCurrentTurn();
             }
             else
             {
@@ -170,8 +171,8 @@ namespace CamelUpEngine
             }
 
             RemoveAllAudienceTiles();
+            ReturnAllTypingCards();
             RefillDicer();
-            SummarizeCurrentTurn();
 
             ActionEventsCollector.AddEvent(new NewTurnEvent());
 
@@ -191,25 +192,17 @@ namespace CamelUpEngine
         private void SummarizeCurrentTurn()
         {
             List<ICoinsAddedEvent> playerCoinsEarnedEvents = new();
-            List<IPlayerTypingCardsReturnedEvent> playerTypingCardsReturnedEvents = new();
 
             foreach (Player player in players)
             {
-                IReadOnlyCollection<ITypingCard> returnedTypingCard = player.ReturnTypingCards();
-                if (returnedTypingCard.Any())
+                if (player.TypingCards.Any())
                 {
-                    playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
-                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.OrderedAllCamels, returnedTypingCard);
-                    if (earnedCoins != 0)
-                    {
-                        playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
-                    }
+                    int earnedCoins = TypingCardsManager.CountCoins(camelsManager.OrderedAllCamels, player.TypingCards);
+                    playerCoinsEarnedEvents.Add(new CoinsAddedEvent(player, player.AddCoins(earnedCoins)));
                 }
             }
-            ActionEventsCollector.AddEvent(new TypingCardsSummaryEvent(playerCoinsEarnedEvents));
 
-            cardManager.Reset();
-            ActionEventsCollector.AddEvent(new AllTypingCardsReturnedEvent(playerTypingCardsReturnedEvents));
+            ActionEventsCollector.AddEvent(new TypingCardsSummaryEvent(playerCoinsEarnedEvents));
         }
 
         private void SummarizeBets()
@@ -235,6 +228,22 @@ namespace CamelUpEngine
         {
             dicer.Reset();
             ActionEventsCollector.AddEvent(new DicerRefilledEvent());
+        }
+
+        private void ReturnAllTypingCards()
+        {
+            List<IPlayerTypingCardsReturnedEvent> playerTypingCardsReturnedEvents = new();
+
+            foreach (Player player in players)
+            {
+                IReadOnlyCollection<ITypingCard> returnedTypingCard = player.ReturnTypingCards();
+                if (returnedTypingCard.Any())
+                {
+                    playerTypingCardsReturnedEvents.Add(new PlayerTypingCardsReturnedEvent(player, returnedTypingCard));
+                }
+            }
+            cardManager.Reset();
+            ActionEventsCollector.AddEvent(new AllTypingCardsReturnedEvent(playerTypingCardsReturnedEvents));
         }
 
         private void RemoveAllAudienceTiles()

@@ -2,12 +2,12 @@
 
 namespace CamelUpEngine.Core.Actions.Events
 {
-    public interface ICoinsCountingEvent : IActionSubEvents<ICoinsAddedEvent>, IActionEvent
+    public interface ITypingCardsSummaryEvent : IActionSubEvents<ICoinsAddedEvent>, IActionEvent
     {
 
     }
 
-    internal class TypingCardsSummaryEvent : ActionSubEvents<ICoinsAddedEvent>, ICoinsCountingEvent
+    internal class TypingCardsSummaryEvent : ActionSubEvents<ICoinsAddedEvent>, ITypingCardsSummaryEvent
     {
         public TypingCardsSummaryEvent(IEnumerable<ICoinsAddedEvent> subEvents) : base(subEvents)
         {
