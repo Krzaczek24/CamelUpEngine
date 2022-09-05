@@ -71,7 +71,7 @@ namespace CamelUpEngine.GameTools
             {
                 events.Add(new CamelsStoodOnAudienceTileEvent(audienceTile));
                 events.Add(new CoinsAddedEvent(audienceTile.Owner, ((Player)audienceTile.Owner).AddCoins(1)));
-                newFieldIndex = field.Index + (ColourHelper.IsMadColour(colour) ? -audienceTile.MoveValue : audienceTile.MoveValue);
+                newFieldIndex = field.Index + (isMadColour ? -audienceTile.MoveValue : audienceTile.MoveValue);
                 int prettyNewFieldIndex = ((newFieldIndex + fields.Count - 1) % fields.Count) + 1;
                 events.Add(new CamelsMovedEvent(camels, field.Index, prettyNewFieldIndex, audienceTile.Side.ToStackPutType()));
                 if (DoesCamelGoThroughFinishLine(newFieldIndex))
